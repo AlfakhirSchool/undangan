@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   couple,
   weddingDateISO,
@@ -20,6 +20,12 @@ export default function Home() {
   const [guest, setGuest] = useState("Bapak/Ibu/Sdr/i");
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const to = params.get("to");
+    if (to) setGuest(to.replace(/\+/g, " "));
+  }, []);
 
   function toggleMusic() {
     const audio = audioRef.current;
