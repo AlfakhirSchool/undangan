@@ -54,8 +54,13 @@ export default function Home() {
           {BACKGROUNDS.map((src, i) => (
             <div
               key={src}
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
-              style={{ backgroundImage: `url(${src})`, opacity: i === bgIndex ? 1 : 0 }}
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-[opacity,transform] duration-[1800ms] ease-in-out will-change-transform"
+              style={{
+                backgroundImage: `url(${src})`,
+                opacity: i === bgIndex ? 1 : 0,
+                transform: i === bgIndex ? "scale(1.08)" : "scale(1)",
+                transitionDuration: i === bgIndex ? "1800ms, 6000ms" : "1800ms, 0ms",
+              }}
             />
           ))}
         </div>
