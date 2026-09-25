@@ -190,10 +190,17 @@ function CoupleSection() {
     <section id="mempelai" className="px-6 py-12 text-center scroll-mt-20">
       <Reveal>
         <SectionTitle>Mempelai</SectionTitle>
-        <p className="text-sm mb-10 opacity-80">
-          Dengan mengucapkan syukur, kami mengundang Bapak/Ibu/Saudara/i untuk
-          menghadiri acara pernikahan kami.
-        </p>
+        <div className="flex items-center gap-4 mb-10 text-left">
+          <img
+            src="/images/couple-portrait.jpg"
+            alt={`${couple.shortGroom} & ${couple.shortBride}`}
+            className="w-28 h-36 object-cover rounded-lg border-2 gold-border shadow-lg shrink-0"
+          />
+          <p className="text-sm opacity-80">
+            Dengan mengucapkan syukur, kami mengundang Bapak/Ibu/Saudara/i
+            untuk menghadiri acara pernikahan kami.
+          </p>
+        </div>
         <div className="space-y-10">
           {[couple.groom, couple.bride].map((p) => (
             <div key={p.name}>
@@ -262,6 +269,11 @@ function StorySection() {
     <section id="love-story" className="px-6 py-12 text-center scroll-mt-20">
       <Reveal>
         <SectionTitle>Our Story</SectionTitle>
+        <img
+          src="/images/couple-portrait.jpg"
+          alt="Feri & Ayu"
+          className="w-40 h-52 object-cover rounded-lg border-2 gold-border shadow-lg mx-auto mb-6"
+        />
         <p className="font-script text-2xl text-gold-light mb-8">
           Feri & Ayu
         </p>
