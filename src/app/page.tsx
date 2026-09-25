@@ -12,14 +12,23 @@ import {
 } from "./data";
 import { useCountdown } from "./useCountdown";
 import { useReveal } from "./useReveal";
+import { useScrollBackground } from "./useScrollBackground";
 import { googleCalendarLink, mapsLink } from "./calendar";
 import { FloralCorner } from "./Floral";
+
+const BACKGROUNDS = [
+  "/images/bg-beach.jpg",
+  "/images/bg1.jpg",
+  "/images/bg2.jpg",
+  "/images/bg3.jpg",
+];
 
 export default function Home() {
   const [opened, setOpened] = useState(false);
   const [guest, setGuest] = useState("Bapak/Ibu/Sdr/i");
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
+  const bgIndex = useScrollBackground(BACKGROUNDS.length);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -39,10 +48,18 @@ export default function Home() {
   }
 
   return (
-    <main
-      className="mx-auto w-full max-w-md min-h-screen relative overflow-hidden bg-background bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url(/images/bg-beach.jpg)" }}
-    >
+    <main className="mx-auto w-full max-w-md min-h-screen relative overflow-hidden bg-background">
+      {opened && (
+        <div className="fixed inset-0 max-w-md mx-auto z-0">
+          {BACKGROUNDS.map((src, i) => (
+            <div
+              key={src}
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
+              style={{ backgroundImage: `url(${src})`, opacity: i === bgIndex ? 1 : 0 }}
+            />
+          ))}
+        </div>
+      )}
       {/* ponytail: add a real royalty-free track at /public/music.mp3 */}
       <audio ref={audioRef} src="/music.mp3" loop />
       {!opened ? (
@@ -97,7 +114,7 @@ function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
 
 function Invitation() {
   return (
-    <div className="pb-24 bg-background/75">
+    <div className="relative z-10 pb-24 bg-background/75">
       <HeroSection />
       <CoupleSection />
       <EventSection />
