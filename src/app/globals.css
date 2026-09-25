@@ -60,3 +60,40 @@ body {
 .animate-spin-slow {
   animation: spin-slow 6s linear infinite;
 }
+
+.card-3d {
+  background: linear-gradient(155deg, #fffdf8 0%, var(--background) 55%, #f1e6d5 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 -6px 10px rgba(122, 74, 32, 0.08) inset,
+    0 10px 20px -8px rgba(58, 36, 22, 0.35),
+    0 2px 4px rgba(58, 36, 22, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-3d:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 -3px 6px rgba(122, 74, 32, 0.08) inset,
+    0 4px 8px -4px rgba(58, 36, 22, 0.3);
+}
+
+.btn-3d {
+  background: linear-gradient(180deg, #c8703c, var(--gold) 55%, var(--gold-light));
+  color: #fff8ee;
+  border: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 4px 0 #5e2c13,
+    0 8px 14px -4px rgba(58, 36, 22, 0.5);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-3d:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 1px 0 #5e2c13,
+    0 3px 6px -2px rgba(58, 36, 22, 0.4);
+}

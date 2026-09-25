@@ -172,7 +172,7 @@ function HeroSection() {
         ].map(([label, value]) => (
           <div
             key={label as string}
-            className="bg-background border gold-border rounded-md w-16 py-2 shadow-sm"
+            className="card-3d border gold-border rounded-md w-16 py-2"
           >
             <div className="text-xl font-semibold text-gold-light">
               {String(value).padStart(2, "0")}
@@ -218,7 +218,7 @@ function EventSection() {
         <SectionTitle>Detail Acara</SectionTitle>
         <div className="space-y-8">
           {events.map((e) => (
-            <div key={e.title} className="border gold-border rounded-lg p-6">
+            <div key={e.title} className="card-3d border gold-border rounded-lg p-6">
               <h3 className="font-script text-3xl text-gold-light mb-2">
                 {e.title}
               </h3>
@@ -321,14 +321,14 @@ function WishesSection() {
           />
           <button
             type="submit"
-            className="w-full px-4 py-2 border gold-border rounded-full text-gold-light text-sm"
+            className="btn-3d w-full px-4 py-2 rounded-full text-sm font-medium"
           >
             KIRIM PESAN
           </button>
         </form>
         <button
           onClick={() => setGiftOpen(true)}
-          className="w-full mb-8 px-4 py-2 border gold-border rounded-full text-gold-light text-sm"
+          className="btn-3d w-full mb-8 px-4 py-2 rounded-full text-sm font-medium"
         >
           KIRIM KADO
         </button>
@@ -367,7 +367,7 @@ function GiftModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="bg-background border gold-border rounded-lg p-6 w-full max-w-sm text-left"
+        className="card-3d border gold-border rounded-lg p-6 w-full max-w-sm text-left"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="font-script text-3xl text-gold-light text-center mb-4">
@@ -458,7 +458,7 @@ function RsvpSection() {
           )}
           <button
             type="submit"
-            className="w-full px-4 py-2 border gold-border rounded-full text-gold-light text-sm"
+            className="btn-3d w-full px-4 py-2 rounded-full text-sm font-medium"
           >
             KIRIM KONFIRMASI
           </button>
@@ -626,7 +626,7 @@ function FloatingTools({
           onClick={() => setQrOpen(false)}
         >
           <div
-            className="bg-background border gold-border rounded-lg p-6 text-center"
+            className="card-3d border gold-border rounded-lg p-6 text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <img
