@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Great_Vibes, Poppins } from "next/font/google";
 import "./globals.css";
 
@@ -17,6 +17,11 @@ const serifFont = Poppins({
 export const metadata: Metadata = {
   title: "Feriman & Ayu Natasya - Undangan Pernikahan",
   description: "Undangan pernikahan Feriman & Ayu Natasya",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -40,7 +40,7 @@ export default function Home() {
 
   return (
     <main
-      className="mx-auto w-full max-w-md min-h-screen relative overflow-hidden bg-background bg-cover bg-center bg-fixed"
+      className="mx-auto w-full max-w-md min-h-screen relative overflow-hidden bg-background bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url(/images/bg-beach.jpg)" }}
     >
       {/* ponytail: add a real royalty-free track at /public/music.mp3 */}
