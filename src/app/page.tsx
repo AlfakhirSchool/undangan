@@ -119,7 +119,7 @@ function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
 
 function Invitation() {
   return (
-    <div className="relative z-10 pb-24 bg-background/75">
+    <div className="relative z-10 pb-24 bg-background/92">
       <HeroSection />
       <CoupleSection />
       <EventSection />
@@ -172,7 +172,7 @@ function HeroSection() {
         ].map(([label, value]) => (
           <div
             key={label as string}
-            className="bg-gold/10 border gold-border rounded-md w-16 py-2"
+            className="bg-background border gold-border rounded-md w-16 py-2 shadow-sm"
           >
             <div className="text-xl font-semibold text-gold-light">
               {String(value).padStart(2, "0")}
@@ -310,14 +310,14 @@ function WishesSection() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nama"
-            className="w-full bg-transparent border gold-border rounded-md px-4 py-2 text-sm outline-none"
+            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm"
           />
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Pesan untuk mempelai :"
             rows={3}
-            className="w-full bg-transparent border gold-border rounded-md px-4 py-2 text-sm outline-none"
+            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm"
           />
           <button
             type="submit"
@@ -430,7 +430,7 @@ function RsvpSection() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nama"
-            className="w-full bg-transparent border gold-border rounded-md px-4 py-2 text-sm outline-none"
+            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm"
           />
           <div className="flex gap-3">
             {(["Hadir", "Tidak Hadir"] as const).map((opt) => (
@@ -453,7 +453,7 @@ function RsvpSection() {
               value={guests}
               onChange={(e) => setGuests(Number(e.target.value))}
               placeholder="Jumlah tamu"
-              className="w-full bg-transparent border gold-border rounded-md px-4 py-2 text-sm outline-none"
+              className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm"
             />
           )}
           <button
