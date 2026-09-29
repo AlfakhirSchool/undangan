@@ -5,6 +5,8 @@
   --foreground: #3a2416;
   --gold: #a6552a;
   --gold-light: #7d3f1f;
+  --adat-red: #8a1c1c;
+  --adat-red-dark: #4a0e0e;
 }
 
 @theme inline {
@@ -97,4 +99,48 @@ body {
     0 1px 0 rgba(255, 255, 255, 0.25) inset,
     0 1px 0 #5e2c13,
     0 3px 6px -2px rgba(58, 36, 22, 0.4);
+}
+
+.btn-3d:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 6px 0 #5e2c13,
+    0 12px 18px -4px rgba(58, 36, 22, 0.55);
+}
+
+.card-3d:hover {
+  transform: translateY(-3px) rotateX(2deg);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 -6px 10px rgba(122, 74, 32, 0.08) inset,
+    0 16px 28px -10px rgba(58, 36, 22, 0.4),
+    0 4px 8px rgba(58, 36, 22, 0.18);
+}
+
+/* Gigi balang: Betawi zigzag ornament border, paired with Bima songket red-gold */
+.gigi-balang {
+  height: 14px;
+  background:
+    linear-gradient(135deg, var(--adat-red) 25%, transparent 25%) 0 0 / 14px 14px,
+    linear-gradient(-135deg, var(--gold) 25%, transparent 25%) 0 0 / 14px 14px;
+  background-color: var(--adat-red-dark);
+  opacity: 0.85;
+}
+
+.gigi-balang-flip {
+  transform: scaleY(-1);
+}
+
+@keyframes float-adat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-3deg);
+  }
+}
+
+.animate-float-adat {
+  animation: float-adat 4.5s ease-in-out infinite;
 }

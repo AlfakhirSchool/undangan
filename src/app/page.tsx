@@ -14,6 +14,7 @@ import { useReveal } from "./useReveal";
 import { useScrollBackground } from "./useScrollBackground";
 import { googleCalendarLink, mapsLink } from "./calendar";
 import { FloralCorner } from "./Floral";
+import { OndelOndel, UmaLengge } from "./AdatMotifs";
 
 const BEACH_PHOTOS = [
   "/images/bg-beach.jpg",
@@ -126,13 +127,16 @@ function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
 function Invitation() {
   return (
     <div className="relative z-10 pb-24 bg-background/70">
+      <div className="gigi-balang" />
       <HeroSection />
       <CoupleSection />
+      <div className="gigi-balang gigi-balang-flip" />
       <EventSection />
       <StorySection />
       <GallerySection />
       <WishesSection />
       <RsvpSection />
+      <div className="gigi-balang" />
       <ClosingSection />
     </div>
   );
@@ -545,6 +549,11 @@ function ClosingSection() {
       <h2 className="font-script text-4xl gold-text mb-10">
         {couple.shortGroom} & {couple.shortBride}
       </h2>
+
+      <div className="flex justify-center items-end gap-8 mb-6">
+        <OndelOndel className="w-10 h-16 animate-float-adat" />
+        <UmaLengge className="w-14 h-14 animate-float-adat" style={{ animationDelay: "1.5s" }} />
+      </div>
 
       <p className="text-[10px] opacity-40">Website by : undangan</p>
     </section>
