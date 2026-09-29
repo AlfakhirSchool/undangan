@@ -14,7 +14,6 @@ import { useReveal } from "./useReveal";
 import { useScrollBackground } from "./useScrollBackground";
 import { googleCalendarLink, mapsLink } from "./calendar";
 import { FloralCorner } from "./Floral";
-import { OndelOndel, UmaLengge } from "./AdatMotifs";
 
 const BEACH_PHOTOS = [
   "/images/bg-beach.jpg",
@@ -127,16 +126,13 @@ function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
 function Invitation() {
   return (
     <div className="relative z-10 pb-24 bg-background/70">
-      <div className="gigi-balang" />
       <HeroSection />
       <CoupleSection />
-      <div className="gigi-balang gigi-balang-flip" />
       <EventSection />
       <StorySection />
       <GallerySection />
       <WishesSection />
       <RsvpSection />
-      <div className="gigi-balang" />
       <ClosingSection />
     </div>
   );
@@ -549,23 +545,6 @@ function ClosingSection() {
       <h2 className="font-script text-4xl gold-text mb-10">
         {couple.shortGroom} & {couple.shortBride}
       </h2>
-
-      <p className="text-xs uppercase tracking-widest opacity-60 mb-4">
-        Dengan Nuansa Adat Betawi & Bima
-      </p>
-      <div className="flex justify-center items-start gap-10 mb-6">
-        <div className="card-3d rounded-xl px-5 py-4 border gold-border">
-          <OndelOndel className="w-10 h-16 mx-auto animate-float-adat" />
-          <p className="text-[10px] mt-2 text-gold-light">Ondel-Ondel</p>
-        </div>
-        <div className="card-3d rounded-xl px-5 py-4 border gold-border">
-          <UmaLengge
-            className="w-14 h-14 mx-auto animate-float-adat"
-            style={{ animationDelay: "1.5s" }}
-          />
-          <p className="text-[10px] mt-2 text-gold-light">Uma Lengge</p>
-        </div>
-      </div>
 
       <p className="text-[10px] opacity-40">Website by : undangan</p>
     </section>
