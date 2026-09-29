@@ -207,7 +207,8 @@ function CoupleSection() {
           {[couple.groom, couple.bride].map((p) => (
             <div key={p.name}>
               <h3 className="font-script text-2xl text-gold-light">
-                {p.name}
+                <span className="text-4xl">{p.name.charAt(0)}</span>
+                {p.name.slice(1)}
               </h3>
               <p className="text-sm mt-2 opacity-90">{p.order}</p>
               <p className="text-sm font-medium">{p.parents}</p>
