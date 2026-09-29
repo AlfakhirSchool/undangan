@@ -64,7 +64,15 @@ export default function Home() {
     if (playing) {
       audio.pause();
     } else {
-      if (audio.currentTime === 0) audio.currentTime = 154;
+      if (audio.currentTime === 0) {
+        if (audio.readyState >= 1) {
+          audio.currentTime = 154;
+        } else {
+          audio.addEventListener("loadedmetadata", () => (audio.currentTime = 154), {
+            once: true,
+          });
+        }
+      }
       fadeInMusic(audio);
     }
     setPlaying(!playing);
