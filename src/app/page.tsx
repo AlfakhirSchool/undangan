@@ -95,7 +95,7 @@ export default function Home() {
 function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
   return (
     <section
-      className="min-h-screen flex flex-col items-center justify-center gap-6 px-8 py-16 text-center border border-gold/40 relative bg-cover bg-center"
+      className="min-h-screen flex flex-col items-center justify-center gap-6 px-8 py-10 text-center border border-gold/40 relative bg-cover bg-center"
       style={{ backgroundImage: "url(/images/bg-beach.jpg)" }}
     >
       <div className="absolute inset-0 bg-black/35" />
@@ -104,7 +104,7 @@ function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
         flip
         className="absolute -right-4 -bottom-4 w-32 h-32 opacity-80 z-10"
       />
-      <h1 className="relative z-10 font-script text-5xl gold-text leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
+      <h1 className="relative z-10 font-script text-4xl gold-text leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
         {couple.shortGroom}
         <br />& {couple.shortBride}
       </h1>
@@ -149,7 +149,7 @@ function Reveal({ children }: { children: React.ReactNode }) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="font-script text-4xl gold-text text-center mb-8">
+    <h2 className="font-script text-3xl gold-text text-center mb-5">
       {children}
     </h2>
   );
@@ -158,7 +158,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function HeroSection() {
   const { days, hours, minutes, seconds } = useCountdown(weddingDateISO);
   return (
-    <section className="px-6 pt-16 pb-10 text-center relative">
+    <section className="px-6 pt-10 pb-10 text-center relative">
       <FloralCorner className="absolute -left-6 -top-4 w-28 h-28 opacity-70" />
       <FloralCorner
         flip
@@ -190,21 +190,21 @@ function HeroSection() {
 
 function CoupleSection() {
   return (
-    <section id="mempelai" className="px-6 py-12 text-center scroll-mt-0">
+    <section id="mempelai" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Mempelai</SectionTitle>
-        <p className="text-base leading-relaxed mb-10 opacity-90">
+        <p className="text-sm leading-relaxed mb-6 opacity-90">
           Dengan mengucapkan syukur, kami mengundang Bapak/Ibu/Saudara/i untuk
           menghadiri acara pernikahan kami.
         </p>
-        <div className="space-y-10">
+        <div className="space-y-6">
           {[couple.groom, couple.bride].map((p) => (
             <div key={p.name}>
-              <h3 className="font-script text-3xl text-gold-light">
+              <h3 className="font-script text-2xl text-gold-light">
                 {p.name}
               </h3>
               <p className="text-sm mt-2 opacity-90">{p.order}</p>
-              <p className="text-base font-medium">{p.parents}</p>
+              <p className="text-sm font-medium">{p.parents}</p>
               <p className="text-sm opacity-80 mt-1">{p.city}</p>
             </div>
           ))}
@@ -216,18 +216,18 @@ function CoupleSection() {
 
 function EventSection() {
   return (
-    <section id="acara" className="px-6 py-12 text-center scroll-mt-0">
+    <section id="acara" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Detail Acara</SectionTitle>
-        <div className="space-y-8">
+        <div className="space-y-5">
           {events.map((e) => (
             <div key={e.title} className="card-3d border gold-border rounded-lg p-6">
-              <h3 className="font-script text-3xl text-gold-light mb-2">
+              <h3 className="font-script text-2xl text-gold-light mb-2">
                 {e.title}
               </h3>
-              <p className="text-base">{e.date}</p>
-              <p className="text-base mb-2">{e.time}</p>
-              <p className="text-base font-semibold">{e.place}</p>
+              <p className="text-sm">{e.date}</p>
+              <p className="text-sm mb-2">{e.time}</p>
+              <p className="text-sm font-semibold">{e.place}</p>
               <p className="text-sm opacity-85 mb-4">{e.address}</p>
               <div className="flex justify-center gap-3 text-xs">
                 <a
@@ -262,20 +262,20 @@ function EventSection() {
 
 function StorySection() {
   return (
-    <section id="love-story" className="px-6 py-12 text-center scroll-mt-0">
+    <section id="love-story" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Our Story</SectionTitle>
-        <p className="font-script text-2xl text-gold-light mb-8">
+        <p className="font-script text-2xl text-gold-light mb-5">
           Feri & Ayu
         </p>
-        <div className="space-y-8 text-left">
+        <div className="space-y-5 text-left">
           {story.map((s) => (
             <div key={s.title} className="border-l-2 gold-border pl-4">
               <h3 className="font-semibold text-lg text-gold-light">
                 {s.title}
               </h3>
               <p className="text-sm opacity-80 mb-1">{s.date}</p>
-              <p className="text-base leading-relaxed opacity-95">{s.text}</p>
+              <p className="text-sm leading-relaxed opacity-95">{s.text}</p>
             </div>
           ))}
         </div>
@@ -301,7 +301,7 @@ function GallerySection() {
   }, []);
 
   return (
-    <section id="gallery" className="px-6 py-12 text-center scroll-mt-0">
+    <section id="gallery" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Galeri Kami</SectionTitle>
         <div className="card-3d relative w-full aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border">
@@ -350,7 +350,7 @@ function WishesSection() {
   }
 
   return (
-    <section id="ucapan" className="px-6 py-12 text-center scroll-mt-0">
+    <section id="ucapan" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Doa & Ucapan</SectionTitle>
         <form onSubmit={submit} className="space-y-3 mb-4 text-left">
@@ -376,7 +376,7 @@ function WishesSection() {
         </form>
         <button
           onClick={() => setGiftOpen(true)}
-          className="btn-3d w-full mb-8 px-4 py-2 rounded-full text-sm font-medium"
+          className="btn-3d w-full mb-5 px-4 py-2 rounded-full text-sm font-medium"
         >
           KIRIM KADO
         </button>
@@ -418,7 +418,7 @@ function GiftModal({ onClose }: { onClose: () => void }) {
         className="card-3d border gold-border rounded-lg p-6 w-full max-w-sm text-left"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="font-script text-3xl text-gold-light text-center mb-4">
+        <h3 className="font-script text-2xl text-gold-light text-center mb-4">
           Kirim Kado
         </h3>
         <div className="space-y-4">
@@ -470,10 +470,10 @@ function RsvpSection() {
   }
 
   return (
-    <section id="rsvp" className="px-6 py-12 text-center scroll-mt-0">
+    <section id="rsvp" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>RSVP / Kehadiran</SectionTitle>
-        <form onSubmit={submit} className="space-y-3 mb-8 text-left">
+        <form onSubmit={submit} className="space-y-3 mb-5 text-left">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -532,7 +532,7 @@ function RsvpSection() {
 
 function ClosingSection() {
   return (
-    <section className="px-6 py-16 text-center relative">
+    <section className="px-6 py-10 text-center relative">
       <FloralCorner className="absolute -left-6 -bottom-6 w-32 h-32 opacity-70" />
       <FloralCorner
         flip
@@ -542,7 +542,7 @@ function ClosingSection() {
         Atas doa & ucapan bapak/ibu/saudara/i, Kami mengucapkan terima kasih.
       </p>
       <p className="text-sm mb-2">Salam</p>
-      <h2 className="font-script text-4xl gold-text mb-10">
+      <h2 className="font-script text-3xl gold-text mb-6">
         {couple.shortGroom} & {couple.shortBride}
       </h2>
 
