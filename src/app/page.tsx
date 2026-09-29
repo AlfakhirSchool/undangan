@@ -272,9 +272,6 @@ function StorySection() {
     <section id="love-story" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Our Story</SectionTitle>
-        <p className="font-script text-2xl text-gold-light mb-5">
-          Feri & Ayu
-        </p>
         <div className="space-y-5 text-left">
           {story.map((s) => (
             <div key={s.title} className="border-l-2 gold-border pl-4">
@@ -578,9 +575,6 @@ function ClosingSection() {
         Atas doa & ucapan bapak/ibu/saudara/i, Kami mengucapkan terima kasih.
       </p>
       <p className="text-sm mb-2">Salam</p>
-      <h2 className="font-script text-4xl gold-text mb-6">
-        {couple.shortGroom} & {couple.shortBride}
-      </h2>
 
       <p className="text-[10px] opacity-40">Website by : undangan</p>
     </section>
