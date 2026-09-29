@@ -302,7 +302,7 @@ function PhotoCarousel({ photos }: { photos: string[] }) {
   useEffect(() => {
     const id = setInterval(() => {
       setActive((i) => (i + 1) % photos.length);
-    }, 3200);
+    }, 5000);
     return () => clearInterval(id);
   }, [photos]);
 
