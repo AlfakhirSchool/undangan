@@ -164,10 +164,6 @@ function HeroSection() {
         flip
         className="absolute -right-6 top-40 w-28 h-28 opacity-70"
       />
-      <h1 className="font-script text-5xl gold-text mb-6 leading-tight">
-        {couple.shortGroom}
-        <br />& {couple.shortBride}
-      </h1>
       <p className="font-script text-2xl text-gold-light mb-1">Save The Date</p>
       <p className="text-sm mb-6">Sabtu, 10 Oktober 2026</p>
       <div className="flex justify-center gap-3">
