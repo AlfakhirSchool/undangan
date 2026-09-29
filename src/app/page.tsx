@@ -36,6 +36,7 @@ const GALLERY_PHOTOS_2 = [
 
 export default function Home() {
   const [opened, setOpened] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [guest, setGuest] = useState("Bapak/Ibu/Sdr/i");
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -48,6 +49,15 @@ export default function Home() {
     if (to) setGuest(to.replace(/\+/g, " "));
   }, []);
 
+  function fadeInMusic(audio: HTMLAudioElement) {
+    audio.volume = 0;
+    audio.play().catch(() => {});
+    const id = setInterval(() => {
+      audio.volume = Math.min(1, audio.volume + 0.05);
+      if (audio.volume >= 1) clearInterval(id);
+    }, 150);
+  }
+
   function toggleMusic() {
     const audio = audioRef.current;
     if (!audio) return;
@@ -55,9 +65,15 @@ export default function Home() {
       audio.pause();
     } else {
       if (audio.currentTime === 0) audio.currentTime = 154;
-      audio.play().catch(() => {});
+      fadeInMusic(audio);
     }
     setPlaying(!playing);
+  }
+
+  function openInvitation() {
+    setClosing(true);
+    toggleMusic();
+    setTimeout(() => setOpened(true), 700);
   }
 
   return (
@@ -80,13 +96,7 @@ export default function Home() {
       )}
       <audio ref={audioRef} src="/music.mp3" loop />
       {!opened ? (
-        <Cover
-          guest={guest}
-          onOpen={() => {
-            setOpened(true);
-            toggleMusic();
-          }}
-        />
+        <Cover guest={guest} closing={closing} onOpen={openInvitation} />
       ) : (
         <>
           <Invitation guest={guest} />
@@ -98,12 +108,37 @@ export default function Home() {
   );
 }
 
-function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
+function Cover({
+  guest,
+  closing,
+  onOpen,
+}: {
+  guest: string;
+  closing: boolean;
+  onOpen: () => void;
+}) {
+  const [bgIndex, setBgIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setBgIndex((i) => (i + 1) % BEACH_PHOTOS.length);
+    }, 4000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <section
-      className="min-h-screen flex flex-col items-center justify-center gap-6 px-8 py-10 text-center border border-gold/40 relative bg-cover bg-center"
-      style={{ backgroundImage: "url(/images/bg-beach.jpg)" }}
+      className={`min-h-screen flex flex-col items-center justify-center gap-5 px-8 py-10 text-center border border-gold/40 relative overflow-hidden transition-all duration-700 ease-in-out ${
+        closing ? "opacity-0 scale-110" : "opacity-100 scale-100"
+      }`}
     >
+      {BEACH_PHOTOS.map((src, i) => (
+        <div
+          key={src}
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
+          style={{ backgroundImage: `url(${src})`, opacity: i === bgIndex ? 1 : 0 }}
+        />
+      ))}
       <div className="absolute inset-0 bg-black/35" />
       <FloralCorner className="absolute -left-4 -top-4 w-32 h-32 opacity-80 z-10" />
       <FloralCorner
@@ -121,7 +156,7 @@ function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
       </div>
       <button
         onClick={onOpen}
-        className="relative z-10 mt-4 px-6 py-3 border border-white/70 rounded-full text-white tracking-widest text-sm hover:bg-white/10 transition"
+        className="relative z-10 mt-3 px-6 py-3 border border-white/70 rounded-full text-white tracking-widest text-sm hover:bg-white/10 transition"
       >
         BUKA UNDANGAN
       </button>
