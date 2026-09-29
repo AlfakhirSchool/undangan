@@ -33,6 +33,7 @@ export default function Home() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const to = params.get("to");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- must run post-mount to avoid SSR/client hydration mismatch on window.location
     if (to) setGuest(to.replace(/\+/g, " "));
   }, []);
 
