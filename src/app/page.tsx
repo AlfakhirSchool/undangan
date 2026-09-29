@@ -158,7 +158,7 @@ function Reveal({ children }: { children: React.ReactNode }) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="font-script text-2xl gold-text text-center mb-5">
+    <h2 className="font-script text-4xl gold-text text-center mb-5">
       {children}
     </h2>
   );
@@ -173,7 +173,7 @@ function HeroSection() {
         flip
         className="absolute -right-6 -top-4 w-28 h-28 opacity-70"
       />
-      <p className="font-script text-xl text-gold-light mb-1">Save The Date</p>
+      <p className="font-script text-2xl text-gold-light mb-1">Save The Date</p>
       <p className="text-sm mb-6">Sabtu, 10 Oktober 2026</p>
       <div className="flex justify-center gap-3">
         {[
@@ -209,7 +209,7 @@ function CoupleSection() {
         <div className="space-y-6">
           {[couple.groom, couple.bride].map((p) => (
             <div key={p.name}>
-              <h3 className="font-script text-xl text-gold-light">
+              <h3 className="font-script text-2xl text-gold-light">
                 {p.name}
               </h3>
               <p className="text-sm mt-2 opacity-90">{p.order}</p>
@@ -231,7 +231,7 @@ function EventSection() {
         <div className="space-y-5">
           {events.map((e) => (
             <div key={e.title} className="card-3d border gold-border rounded-lg p-6">
-              <h3 className="font-script text-xl text-gold-light mb-2">
+              <h3 className="font-script text-2xl text-gold-light mb-2">
                 {e.title}
               </h3>
               <p className="text-sm">{e.date}</p>
@@ -274,13 +274,13 @@ function StorySection() {
     <section id="love-story" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Our Story</SectionTitle>
-        <p className="font-script text-xl text-gold-light mb-5">
+        <p className="font-script text-2xl text-gold-light mb-5">
           Feri & Ayu
         </p>
         <div className="space-y-5 text-left">
           {story.map((s) => (
             <div key={s.title} className="border-l-2 gold-border pl-4">
-              <h3 className="font-script text-xl text-gold-light">
+              <h3 className="font-script text-2xl text-gold-light">
                 {s.title}
               </h3>
               <p className="text-sm opacity-80 mb-1">{s.date}</p>
@@ -427,7 +427,7 @@ function GiftModal({ onClose }: { onClose: () => void }) {
         className="card-3d border gold-border rounded-lg p-6 w-full max-w-sm text-left"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="font-script text-xl text-gold-light text-center mb-4">
+        <h3 className="font-script text-2xl text-gold-light text-center mb-4">
           Kirim Kado
         </h3>
         <div className="space-y-4">
@@ -551,7 +551,7 @@ function ClosingSection() {
         Atas doa & ucapan bapak/ibu/saudara/i, Kami mengucapkan terima kasih.
       </p>
       <p className="text-sm mb-2">Salam</p>
-      <h2 className="font-script text-2xl gold-text mb-6">
+      <h2 className="font-script text-4xl gold-text mb-6">
         {couple.shortGroom} & {couple.shortBride}
       </h2>
 
