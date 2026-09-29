@@ -118,14 +118,16 @@ body {
     0 4px 8px rgba(58, 36, 22, 0.18);
 }
 
-/* Gigi balang: Betawi zigzag ornament border, paired with Bima songket red-gold */
+/* Gigi balang: Betawi zigzag ornament border, in Bima songket red-gold, blended into the page background */
 .gigi-balang {
-  height: 14px;
+  height: 10px;
   background:
-    linear-gradient(135deg, var(--adat-red) 25%, transparent 25%) 0 0 / 14px 14px,
-    linear-gradient(-135deg, var(--gold) 25%, transparent 25%) 0 0 / 14px 14px;
-  background-color: var(--adat-red-dark);
-  opacity: 0.85;
+    linear-gradient(135deg, var(--adat-red) 25%, transparent 25%) 0 0 / 10px 10px,
+    linear-gradient(-135deg, var(--gold) 25%, transparent 25%) 0 0 / 10px 10px;
+  background-color: var(--background);
+  border-top: 1px solid var(--gold);
+  border-bottom: 1px solid var(--gold);
+  opacity: 0.75;
 }
 
 .gigi-balang-flip {

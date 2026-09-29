@@ -550,9 +550,21 @@ function ClosingSection() {
         {couple.shortGroom} & {couple.shortBride}
       </h2>
 
-      <div className="flex justify-center items-end gap-8 mb-6">
-        <OndelOndel className="w-10 h-16 animate-float-adat" />
-        <UmaLengge className="w-14 h-14 animate-float-adat" style={{ animationDelay: "1.5s" }} />
+      <p className="text-xs uppercase tracking-widest opacity-60 mb-4">
+        Dengan Nuansa Adat Betawi & Bima
+      </p>
+      <div className="flex justify-center items-start gap-10 mb-6">
+        <div className="card-3d rounded-xl px-5 py-4 border gold-border">
+          <OndelOndel className="w-10 h-16 mx-auto animate-float-adat" />
+          <p className="text-[10px] mt-2 text-gold-light">Ondel-Ondel</p>
+        </div>
+        <div className="card-3d rounded-xl px-5 py-4 border gold-border">
+          <UmaLengge
+            className="w-14 h-14 mx-auto animate-float-adat"
+            style={{ animationDelay: "1.5s" }}
+          />
+          <p className="text-[10px] mt-2 text-gold-light">Uma Lengge</p>
+        </div>
       </div>
 
       <p className="text-[10px] opacity-40">Website by : undangan</p>
