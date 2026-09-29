@@ -7,7 +7,6 @@ import {
   events,
   story,
   initialWishes,
-  invitedFamilies,
   giftAccounts,
 } from "./data";
 import { useCountdown } from "./useCountdown";
@@ -538,31 +537,6 @@ function ClosingSection() {
         {couple.shortGroom} & {couple.shortBride}
       </h2>
 
-      <h3 className="font-script text-2xl text-gold-light mb-4">
-        Turut Mengundang
-      </h3>
-      <div className="grid grid-cols-2 gap-6 text-xs text-left mb-10">
-        <div>
-          <p className="font-semibold text-gold-light mb-2">
-            Kel. Mempelai Pria
-          </p>
-          <ul className="space-y-1 opacity-80">
-            {invitedFamilies.groom.map((f) => (
-              <li key={f}>{f}</li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <p className="font-semibold text-gold-light mb-2">
-            Kel. Mempelai Wanita
-          </p>
-          <ul className="space-y-1 opacity-80">
-            {invitedFamilies.bride.map((f) => (
-              <li key={f}>{f}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
       <p className="text-[10px] opacity-40">Website by : undangan</p>
     </section>
   );

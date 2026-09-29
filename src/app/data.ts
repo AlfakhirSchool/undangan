@@ -90,16 +90,3 @@ export const initialWishes = [
   },
 ];
 
-export const invitedFamilies = {
-  groom: [
-    "Kel. Bapak Ucok S,H",
-    "Kel. Bapak Lorem S,Th",
-    "Kel. Ibu D Liam Alexander",
-    "Kel. Bapak Olivia Jade S,E",
-  ],
-  bride: [
-    "Kel. Sarah Anderson, S.E., M.Sc.",
-    "Kel. Michael Collins, S.Psi., M.Psi.",
-    "Kel. Emily Johnson, S.Farm., M.Farm.",
-  ],
-};
