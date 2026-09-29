@@ -54,7 +54,7 @@ export default function Home() {
     if (playing) {
       audio.pause();
     } else {
-      if (audio.currentTime === 0) audio.currentTime = 73;
+      if (audio.currentTime === 0) audio.currentTime = 154;
       audio.play().catch(() => {});
     }
     setPlaying(!playing);
