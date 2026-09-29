@@ -264,11 +264,6 @@ function StorySection() {
     <section id="love-story" className="px-6 py-12 text-center scroll-mt-20">
       <Reveal>
         <SectionTitle>Our Story</SectionTitle>
-        <img
-          src="/images/couple-portrait.jpg"
-          alt="Feri & Ayu"
-          className="w-40 h-52 object-cover rounded-lg border-2 gold-border shadow-lg mx-auto mb-6"
-        />
         <p className="font-script text-2xl text-gold-light mb-8">
           Feri & Ayu
         </p>
