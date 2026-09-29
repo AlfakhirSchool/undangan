@@ -22,13 +22,7 @@ const BEACH_PHOTOS = [
   "/images/bg3.jpg",
 ];
 
-const GALLERY_PHOTOS = [
-  "/images/couple-portrait.jpg",
-  "/images/bg-beach.jpg",
-  "/images/bg1.jpg",
-  "/images/bg2.jpg",
-  "/images/bg3.jpg",
-];
+const GALLERY_PHOTOS = ["/images/couple-portrait.jpg"];
 
 export default function Home() {
   const [opened, setOpened] = useState(false);
@@ -297,45 +291,15 @@ function StorySection() {
 }
 
 function GallerySection() {
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setActive((i) => (i + 1) % GALLERY_PHOTOS.length);
-    }, 3200);
-    return () => clearInterval(id);
-  }, []);
-
   return (
     <section id="gallery" className="px-6 py-12 text-center scroll-mt-20">
       <Reveal>
         <SectionTitle>Galeri Kami</SectionTitle>
-        <div className="card-3d relative w-full aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border">
-          {GALLERY_PHOTOS.map((src, i) => (
-            <div
-              key={src}
-              className="absolute inset-0 bg-cover bg-center transition-[opacity,transform] ease-in-out"
-              style={{
-                backgroundImage: `url(${src})`,
-                opacity: i === active ? 1 : 0,
-                transform: i === active ? "scale(1.06)" : "scale(1)",
-                transitionDuration: i === active ? "900ms, 3500ms" : "900ms, 0ms",
-              }}
-            />
-          ))}
-        </div>
-        <div className="flex justify-center gap-2 mt-4">
-          {GALLERY_PHOTOS.map((src, i) => (
-            <button
-              key={src}
-              onClick={() => setActive(i)}
-              aria-label={`Foto ${i + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === active ? "w-6 bg-gold" : "w-2 bg-gold/30"
-              }`}
-            />
-          ))}
-        </div>
+        <img
+          src={GALLERY_PHOTOS[0]}
+          alt="Feri & Ayu"
+          className="card-3d w-full aspect-[3/4] object-cover rounded-xl border-2 gold-border"
+        />
       </Reveal>
     </section>
   );
