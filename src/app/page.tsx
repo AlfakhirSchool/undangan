@@ -145,9 +145,10 @@ function Cover({
         flip
         className="absolute -right-4 -bottom-4 w-32 h-32 opacity-80 z-10"
       />
-      <h1 className="relative z-10 font-script text-4xl gold-text leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
+      <h1 className="relative z-10 w-full text-center font-script text-4xl gold-text leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
         {couple.shortGroom}
-        <br />& {couple.shortBride}
+        <br />
+        <span>&amp; {couple.shortBride}</span>
       </h1>
       <div className="relative z-10 text-sm tracking-wide text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
         <p>Kepada Yth. Bapak/Ibu/Sdr/i</p>
