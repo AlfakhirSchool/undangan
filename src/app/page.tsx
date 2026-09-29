@@ -207,7 +207,7 @@ function CoupleSection() {
               <h3 className="font-script text-3xl text-gold-light">
                 {p.name}
               </h3>
-              <p className="text-xs mt-2 opacity-80">Putra/Putri dari</p>
+              <p className="text-xs mt-2 opacity-80">{p.order}</p>
               <p className="text-sm">{p.parents}</p>
               <p className="text-xs opacity-60 mt-1">{p.city}</p>
             </div>
