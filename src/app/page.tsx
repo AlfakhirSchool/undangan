@@ -28,6 +28,12 @@ const GALLERY_PHOTOS = [
   "/images/gallery3.jpg",
 ];
 
+const GALLERY_PHOTOS_2 = [
+  "/images/gallery4.jpg",
+  "/images/gallery5.jpg",
+  "/images/gallery6.jpg",
+];
+
 export default function Home() {
   const [opened, setOpened] = useState(false);
   const [guest, setGuest] = useState("Bapak/Ibu/Sdr/i");
@@ -290,45 +296,56 @@ function StorySection() {
   );
 }
 
-function GallerySection() {
+function PhotoCarousel({ photos }: { photos: string[] }) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => {
-      setActive((i) => (i + 1) % GALLERY_PHOTOS.length);
+      setActive((i) => (i + 1) % photos.length);
     }, 3200);
     return () => clearInterval(id);
-  }, []);
+  }, [photos]);
 
+  return (
+    <>
+      <div className="card-3d relative w-full aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border">
+        {photos.map((src, i) => (
+          <div
+            key={src}
+            className="absolute inset-0 bg-cover bg-center transition-[opacity,transform] ease-in-out"
+            style={{
+              backgroundImage: `url(${src})`,
+              opacity: i === active ? 1 : 0,
+              transform: i === active ? "scale(1.06)" : "scale(1)",
+              transitionDuration: i === active ? "900ms, 3500ms" : "900ms, 0ms",
+            }}
+          />
+        ))}
+      </div>
+      <div className="flex justify-center gap-2 mt-4">
+        {photos.map((src, i) => (
+          <button
+            key={src}
+            onClick={() => setActive(i)}
+            aria-label={`Foto ${i + 1}`}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i === active ? "w-6 bg-gold" : "w-2 bg-gold/30"
+            }`}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function GallerySection() {
   return (
     <section id="gallery" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Galeri Kami</SectionTitle>
-        <div className="card-3d relative w-full aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border">
-          {GALLERY_PHOTOS.map((src, i) => (
-            <div
-              key={src}
-              className="absolute inset-0 bg-cover bg-center transition-[opacity,transform] ease-in-out"
-              style={{
-                backgroundImage: `url(${src})`,
-                opacity: i === active ? 1 : 0,
-                transform: i === active ? "scale(1.06)" : "scale(1)",
-                transitionDuration: i === active ? "900ms, 3500ms" : "900ms, 0ms",
-              }}
-            />
-          ))}
-        </div>
-        <div className="flex justify-center gap-2 mt-4">
-          {GALLERY_PHOTOS.map((src, i) => (
-            <button
-              key={src}
-              onClick={() => setActive(i)}
-              aria-label={`Foto ${i + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === active ? "w-6 bg-gold" : "w-2 bg-gold/30"
-              }`}
-            />
-          ))}
+        <PhotoCarousel photos={GALLERY_PHOTOS} />
+        <div className="mt-10">
+          <PhotoCarousel photos={GALLERY_PHOTOS_2} />
         </div>
       </Reveal>
     </section>
