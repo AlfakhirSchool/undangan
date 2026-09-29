@@ -113,7 +113,7 @@ function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
 
 function Invitation() {
   return (
-    <div className="relative z-10 pb-24 bg-background/92">
+    <div className="relative z-10 pb-24 bg-background/70">
       <HeroSection />
       <CoupleSection />
       <EventSection />
