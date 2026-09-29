@@ -190,7 +190,7 @@ function HeroSection() {
 
 function CoupleSection() {
   return (
-    <section id="mempelai" className="px-6 py-12 text-center scroll-mt-20">
+    <section id="mempelai" className="px-6 py-12 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Mempelai</SectionTitle>
         <p className="text-base leading-relaxed mb-10 opacity-90">
@@ -216,7 +216,7 @@ function CoupleSection() {
 
 function EventSection() {
   return (
-    <section id="acara" className="px-6 py-12 text-center scroll-mt-20">
+    <section id="acara" className="px-6 py-12 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Detail Acara</SectionTitle>
         <div className="space-y-8">
@@ -262,7 +262,7 @@ function EventSection() {
 
 function StorySection() {
   return (
-    <section id="love-story" className="px-6 py-12 text-center scroll-mt-20">
+    <section id="love-story" className="px-6 py-12 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Our Story</SectionTitle>
         <p className="font-script text-2xl text-gold-light mb-8">
@@ -301,7 +301,7 @@ function GallerySection() {
   }, []);
 
   return (
-    <section id="gallery" className="px-6 py-12 text-center scroll-mt-20">
+    <section id="gallery" className="px-6 py-12 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Galeri Kami</SectionTitle>
         <div className="card-3d relative w-full aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border">
@@ -350,7 +350,7 @@ function WishesSection() {
   }
 
   return (
-    <section id="ucapan" className="px-6 py-12 text-center scroll-mt-20">
+    <section id="ucapan" className="px-6 py-12 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Doa & Ucapan</SectionTitle>
         <form onSubmit={submit} className="space-y-3 mb-4 text-left">
@@ -470,7 +470,7 @@ function RsvpSection() {
   }
 
   return (
-    <section id="rsvp" className="px-6 py-12 text-center scroll-mt-20">
+    <section id="rsvp" className="px-6 py-12 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>RSVP / Kehadiran</SectionTitle>
         <form onSubmit={submit} className="space-y-3 mb-8 text-left">
