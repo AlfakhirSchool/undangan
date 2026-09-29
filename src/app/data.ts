@@ -45,32 +45,32 @@ export const giftAccounts = [
 
 export const story = [
   {
-    title: "🌱 Tiga Besar Beda Arah",
+    title: "Tiga Besar Beda Arah",
     date: "2016",
     text: 'Tahun 2016, di kelas 2 MTs Islamiyah Sawangan, ada dua murid dengan prestasi "seimbang": Ayu tiga besar dari atas, Feri tiga besar dari bawah. Ayu rajin mencatat di depan kelas, Feri lebih rajin dipanggil guru BK. Siapa sangka, dari sering minta tolong dikerjain PR, kami justru jadi teman dekat.',
   },
   {
-    title: "🏫 Beda Sekolah, Hilang Kabar",
+    title: "Beda Sekolah, Hilang Kabar",
     date: "2018",
     text: "Lulus MTs, kami melanjutkan ke SMA yang berbeda. Perlahan komunikasi merenggang, hingga sejak kelas 2 SMA kami benar-benar kehilangan kabar. Ayu tetap sibuk dengan prestasinya, Feri tetap sibuk dengan… ya, kebandelannya.",
   },
   {
-    title: "🔄 Dipertemukan Kembali",
+    title: "Dipertemukan Kembali",
     date: "2020",
     text: "Selepas lulus SMA, Allah mempertemukan kami kembali. Ternyata Feri sudah mulai tobat, dan Ayu masih mau membalas pesannya. Sebuah keajaiban kecil.",
   },
   {
-    title: "🚆 Jogja – Depok",
+    title: "Jogja – Depok",
     date: "2020–2024",
     text: "Kami kuliah di kota yang berbeda, Feri di Yogyakarta, Ayu di Depok. Empat tahun LDR, dan kali ini yang dicontek bukan lagi PR, melainkan semangat untuk sama-sama menyelesaikan kuliah. Jarak tidak menjauhkan, justru membuat Feri belajar serius.",
   },
   {
-    title: "💍 Lamaran",
+    title: "Lamaran",
     date: "Syawal 2026",
     text: "Tahun ini, Feri akhirnya lulus ujian paling penting dalam hidupnya: datang ke rumah Ayu dan melamar. Selepas Lebaran, kedua keluarga bertemu dan mengikat janji.",
   },
   {
-    title: "💒 Hari Bahagia",
+    title: "Hari Bahagia",
     date: "Oktober 2026",
     text: "Dengan izin Allah SWT, tiga besar dari atas dan tiga besar dari bawah akhirnya resmi jadi satu tim. Kalau dirata-rata, hasilnya pas di tengah: saling melengkapi.",
   },
