@@ -23,6 +23,14 @@ const BACKGROUNDS = [
   "/images/bg3.jpg",
 ];
 
+const GALLERY_PHOTOS = [
+  "/images/couple-portrait.jpg",
+  "/images/bg-beach.jpg",
+  "/images/bg1.jpg",
+  "/images/bg2.jpg",
+  "/images/bg3.jpg",
+];
+
 export default function Home() {
   const [opened, setOpened] = useState(false);
   const [guest, setGuest] = useState("Bapak/Ibu/Sdr/i");
@@ -125,6 +133,7 @@ function Invitation() {
       <CoupleSection />
       <EventSection />
       <StorySection />
+      <GallerySection />
       <WishesSection />
       <RsvpSection />
       <ClosingSection />
@@ -295,6 +304,51 @@ function StorySection() {
         <p className="text-xs text-gold-light mt-2 tracking-wide">
           #FeriAyuTigaBesarDuaArah
         </p>
+      </Reveal>
+    </section>
+  );
+}
+
+function GallerySection() {
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActive((i) => (i + 1) % GALLERY_PHOTOS.length);
+    }, 3200);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <section id="gallery" className="px-6 py-12 text-center scroll-mt-20">
+      <Reveal>
+        <SectionTitle>Galeri Kami</SectionTitle>
+        <div className="card-3d relative w-full aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border">
+          {GALLERY_PHOTOS.map((src, i) => (
+            <div
+              key={src}
+              className="absolute inset-0 bg-cover bg-center transition-[opacity,transform] ease-in-out"
+              style={{
+                backgroundImage: `url(${src})`,
+                opacity: i === active ? 1 : 0,
+                transform: i === active ? "scale(1.06)" : "scale(1)",
+                transitionDuration: i === active ? "900ms, 3500ms" : "900ms, 0ms",
+              }}
+            />
+          ))}
+        </div>
+        <div className="flex justify-center gap-2 mt-4">
+          {GALLERY_PHOTOS.map((src, i) => (
+            <button
+              key={src}
+              onClick={() => setActive(i)}
+              aria-label={`Foto ${i + 1}`}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === active ? "w-6 bg-gold" : "w-2 bg-gold/30"
+              }`}
+            />
+          ))}
+        </div>
       </Reveal>
     </section>
   );
@@ -567,6 +621,16 @@ function IconBook() {
   );
 }
 
+function IconImage() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8.5" cy="9.5" r="1.5" />
+      <path d="m4 17 5-5 4 4 3-3 4 4" />
+    </svg>
+  );
+}
+
 function IconEnvelope() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
@@ -580,6 +644,7 @@ const NAV_ITEMS = [
   { id: "mempelai", label: "Mempelai", Icon: IconHeart },
   { id: "acara", label: "Acara", Icon: IconCalendar },
   { id: "love-story", label: "Love Story", Icon: IconBook },
+  { id: "gallery", label: "Galeri", Icon: IconImage },
   { id: "ucapan", label: "Ucapan", Icon: IconEnvelope },
 ];
 
