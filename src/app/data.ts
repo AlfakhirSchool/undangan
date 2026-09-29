@@ -1,12 +1,12 @@
 export const couple = {
   groom: {
     name: "Feriman",
-    parents: "Ayah Feriman & Ibu Feriman",
+    parents: "Bapak Hatta & Ibu Hartini",
     city: "Jakarta Timur",
   },
   bride: {
     name: "Ayu Natasya",
-    parents: "Ayah Ayu Natasya & Ibu Ayu Natasya",
+    parents: "Bapak Marhadi & Ibu Ika Novita",
     city: "Jakarta Utara",
   },
   shortGroom: "Feri",
