@@ -9,7 +9,7 @@ export const couple = {
     parents: "Ayah Ayu Natasya & Ibu Ayu Natasya",
     city: "Jakarta Utara",
   },
-  shortGroom: "Feriman",
+  shortGroom: "Feri",
   shortBride: "Ayu",
 };
 
