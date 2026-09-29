@@ -31,6 +31,7 @@ const GALLERY_PHOTOS = [
 export default function Home() {
   const [opened, setOpened] = useState(false);
   const [guest, setGuest] = useState("Bapak/Ibu/Sdr/i");
+  const [activeTab, setActiveTab] = useState("mempelai");
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const bgIndex = useScrollBackground(BEACH_PHOTOS.length);
@@ -83,8 +84,8 @@ export default function Home() {
         />
       ) : (
         <>
-          <Invitation />
-          <BottomNav />
+          <Invitation activeTab={activeTab} />
+          <BottomNav activeTab={activeTab} onChange={setActiveTab} />
           <FloatingTools playing={playing} onToggleMusic={toggleMusic} />
         </>
       )}
@@ -123,17 +124,25 @@ function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
   );
 }
 
-function Invitation() {
+function Invitation({
+  activeTab,
+}: {
+  activeTab: string;
+}) {
   return (
     <div className="relative z-10 pb-24 bg-background/70">
       <HeroSection />
-      <CoupleSection />
-      <EventSection />
-      <StorySection />
-      <GallerySection />
-      <WishesSection />
-      <RsvpSection />
-      <ClosingSection />
+      {activeTab === "mempelai" && <CoupleSection />}
+      {activeTab === "acara" && <EventSection />}
+      {activeTab === "love-story" && <StorySection />}
+      {activeTab === "gallery" && <GallerySection />}
+      {activeTab === "ucapan" && (
+        <>
+          <WishesSection />
+          <RsvpSection />
+          <ClosingSection />
+        </>
+      )}
     </div>
   );
 }
@@ -604,20 +613,31 @@ const NAV_ITEMS = [
   { id: "ucapan", label: "Ucapan", Icon: IconEnvelope },
 ];
 
-function BottomNav() {
+function BottomNav({
+  activeTab,
+  onChange,
+}: {
+  activeTab: string;
+  onChange: (id: string) => void;
+}) {
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-background/95 border-t gold-border flex justify-around py-2 z-40">
       {NAV_ITEMS.map(({ id, label, Icon }) => (
-        <a
+        <button
           key={id}
-          href={`#${id}`}
-          className="flex flex-col items-center text-[10px] text-foreground/70 hover:text-gold-light px-1"
+          onClick={() => {
+            onChange(id);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className={`flex flex-col items-center text-[10px] px-1 ${
+            activeTab === id ? "text-gold-light font-semibold" : "text-foreground/70"
+          }`}
         >
           <span className="mb-1 text-gold-light">
             <Icon />
           </span>
           {label}
-        </a>
+        </button>
       ))}
     </nav>
   );
