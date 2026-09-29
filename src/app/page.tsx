@@ -11,10 +11,16 @@ import {
 } from "./data";
 import { useCountdown } from "./useCountdown";
 import { useReveal } from "./useReveal";
+import { useScrollBackground } from "./useScrollBackground";
 import { googleCalendarLink, mapsLink } from "./calendar";
 import { FloralCorner } from "./Floral";
 
-const PAGE_BACKGROUND = "/images/bg-beach.jpg";
+const BEACH_PHOTOS = [
+  "/images/bg-beach.jpg",
+  "/images/bg1.jpg",
+  "/images/bg2.jpg",
+  "/images/bg3.jpg",
+];
 
 const GALLERY_PHOTOS = [
   "/images/couple-portrait.jpg",
@@ -29,6 +35,7 @@ export default function Home() {
   const [guest, setGuest] = useState("Bapak/Ibu/Sdr/i");
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
+  const bgIndex = useScrollBackground(BEACH_PHOTOS.length);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -52,10 +59,18 @@ export default function Home() {
     <main className="mx-auto w-full max-w-md min-h-screen relative overflow-hidden bg-background">
       {opened && (
         <div className="fixed inset-0 max-w-md mx-auto z-0">
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${PAGE_BACKGROUND})` }}
-          />
+          {BEACH_PHOTOS.map((src, i) => (
+            <div
+              key={src}
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-[opacity,transform] duration-[1800ms] ease-in-out will-change-transform"
+              style={{
+                backgroundImage: `url(${src})`,
+                opacity: i === bgIndex ? 1 : 0,
+                transform: i === bgIndex ? "scale(1.08)" : "scale(1)",
+                transitionDuration: i === bgIndex ? "1800ms, 6000ms" : "1800ms, 0ms",
+              }}
+            />
+          ))}
         </div>
       )}
       {/* ponytail: add a real royalty-free track at /public/music.mp3 */}
