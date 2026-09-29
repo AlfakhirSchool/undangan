@@ -193,7 +193,7 @@ function CoupleSection() {
     <section id="mempelai" className="px-6 py-12 text-center scroll-mt-20">
       <Reveal>
         <SectionTitle>Mempelai</SectionTitle>
-        <p className="text-sm mb-10 opacity-80">
+        <p className="text-base leading-relaxed mb-10 opacity-90">
           Dengan mengucapkan syukur, kami mengundang Bapak/Ibu/Saudara/i untuk
           menghadiri acara pernikahan kami.
         </p>
@@ -203,9 +203,9 @@ function CoupleSection() {
               <h3 className="font-script text-3xl text-gold-light">
                 {p.name}
               </h3>
-              <p className="text-xs mt-2 opacity-80">{p.order}</p>
-              <p className="text-sm">{p.parents}</p>
-              <p className="text-xs opacity-60 mt-1">{p.city}</p>
+              <p className="text-sm mt-2 opacity-90">{p.order}</p>
+              <p className="text-base font-medium">{p.parents}</p>
+              <p className="text-sm opacity-80 mt-1">{p.city}</p>
             </div>
           ))}
         </div>
@@ -225,10 +225,10 @@ function EventSection() {
               <h3 className="font-script text-3xl text-gold-light mb-2">
                 {e.title}
               </h3>
-              <p className="text-sm">{e.date}</p>
-              <p className="text-sm mb-2">{e.time}</p>
-              <p className="text-sm font-semibold">{e.place}</p>
-              <p className="text-xs opacity-70 mb-4">{e.address}</p>
+              <p className="text-base">{e.date}</p>
+              <p className="text-base mb-2">{e.time}</p>
+              <p className="text-base font-semibold">{e.place}</p>
+              <p className="text-sm opacity-85 mb-4">{e.address}</p>
               <div className="flex justify-center gap-3 text-xs">
                 <a
                   href={mapsLink(`${e.place} ${e.address}`)}
@@ -274,8 +274,8 @@ function StorySection() {
               <h3 className="font-semibold text-lg text-gold-light">
                 {s.title}
               </h3>
-              <p className="text-xs opacity-60 mb-1">{s.date}</p>
-              <p className="text-sm opacity-90">{s.text}</p>
+              <p className="text-sm opacity-80 mb-1">{s.date}</p>
+              <p className="text-base leading-relaxed opacity-95">{s.text}</p>
             </div>
           ))}
         </div>
