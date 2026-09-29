@@ -77,7 +77,6 @@ export default function Home() {
           ))}
         </div>
       )}
-      {/* ponytail: add a real royalty-free track at /public/music.mp3 */}
       <audio ref={audioRef} src="/music.mp3" loop />
       {!opened ? (
         <Cover
