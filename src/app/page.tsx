@@ -159,10 +159,10 @@ function HeroSection() {
   const { days, hours, minutes, seconds } = useCountdown(weddingDateISO);
   return (
     <section className="px-6 pt-16 pb-10 text-center relative">
-      <FloralCorner className="absolute -left-6 top-0 w-28 h-28 opacity-70" />
+      <FloralCorner className="absolute -left-6 -top-4 w-28 h-28 opacity-70" />
       <FloralCorner
         flip
-        className="absolute -right-6 top-0 w-28 h-28 opacity-70"
+        className="absolute -right-6 -top-4 w-28 h-28 opacity-70"
       />
       <p className="font-script text-2xl text-gold-light mb-1">Save The Date</p>
       <p className="text-sm mb-6">Sabtu, 10 Oktober 2026</p>
