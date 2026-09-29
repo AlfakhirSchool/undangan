@@ -296,13 +296,7 @@ function StorySection() {
   );
 }
 
-function PhotoCarousel({
-  photos,
-  direction = "left",
-}: {
-  photos: string[];
-  direction?: "left" | "right";
-}) {
+function PhotoCarousel({ photos }: { photos: string[] }) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -312,20 +306,16 @@ function PhotoCarousel({
     return () => clearInterval(id);
   }, [photos]);
 
-  const offscreen = direction === "left" ? "100%" : "-100%";
-
   return (
     <>
       <div className="card-3d relative w-full aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border">
         {photos.map((src, i) => (
           <div
             key={src}
-            className="absolute inset-0 bg-cover bg-center transition-[opacity,transform] ease-in-out"
+            className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out"
             style={{
               backgroundImage: `url(${src})`,
               opacity: i === active ? 1 : 0,
-              transform: i === active ? "translateX(0) scale(1.06)" : `translateX(${offscreen}) scale(1)`,
-              transitionDuration: i === active ? "700ms, 3500ms" : "700ms, 0ms",
             }}
           />
         ))}
@@ -351,9 +341,9 @@ function GallerySection() {
     <section id="gallery" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Galeri Kami</SectionTitle>
-        <PhotoCarousel photos={GALLERY_PHOTOS} direction="left" />
+        <PhotoCarousel photos={GALLERY_PHOTOS} />
         <div className="mt-10">
-          <PhotoCarousel photos={GALLERY_PHOTOS_2} direction="right" />
+          <PhotoCarousel photos={GALLERY_PHOTOS_2} />
         </div>
       </Reveal>
     </section>
