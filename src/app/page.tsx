@@ -88,7 +88,7 @@ export default function Home() {
         />
       ) : (
         <>
-          <Invitation />
+          <Invitation guest={guest} />
           <BottomNav />
           <FloatingTools playing={playing} onToggleMusic={toggleMusic} />
         </>
@@ -128,7 +128,7 @@ function Cover({ guest, onOpen }: { guest: string; onOpen: () => void }) {
   );
 }
 
-function Invitation() {
+function Invitation({ guest }: { guest: string }) {
   return (
     <div className="relative z-10 pb-24 bg-background/70">
       <HeroSection />
@@ -136,8 +136,8 @@ function Invitation() {
       <EventSection />
       <StorySection />
       <GallerySection />
-      <WishesSection />
-      <RsvpSection />
+      <WishesSection guest={guest} />
+      <RsvpSection guest={guest} />
       <ClosingSection />
     </div>
   );
@@ -349,17 +349,31 @@ function GallerySection() {
   );
 }
 
-function WishesSection() {
+function WishesSection({ guest }: { guest: string }) {
   const [wishes, setWishes] = useState(initialWishes);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [giftOpen, setGiftOpen] = useState(false);
 
+  useEffect(() => {
+    const saved = localStorage.getItem("wishes");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading persisted client data post-mount
+    if (saved) setWishes(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- prefill from URL guest name post-mount
+    if (params.get("to")) setName(guest);
+  }, [guest]);
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !message.trim()) return;
-    setWishes([{ name, message }, ...wishes]);
-    setName("");
+    const next = [{ name, message }, ...wishes];
+    setWishes(next);
+    // ponytail: localStorage only persists per-device; move to a real DB if wishes must be shared across all guests
+    localStorage.setItem("wishes", JSON.stringify(next));
     setMessage("");
   }
 
@@ -394,7 +408,7 @@ function WishesSection() {
         >
           KIRIM KADO
         </button>
-        <div className="space-y-4 text-left">
+        <div className="space-y-4 text-left max-h-72 overflow-y-auto pr-1">
           {wishes.map((w, i) => (
             <div key={i} className="border-b border-gold/20 pb-3">
               <p className="text-sm font-semibold text-gold-light">
@@ -468,12 +482,18 @@ function GiftModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function RsvpSection() {
+function RsvpSection({ guest }: { guest: string }) {
   type Rsvp = { name: string; attend: "Hadir" | "Tidak Hadir"; guests: number };
   const [list, setList] = useState<Rsvp[]>([]);
   const [name, setName] = useState("");
   const [attend, setAttend] = useState<Rsvp["attend"]>("Hadir");
   const [guests, setGuests] = useState(1);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- prefill from URL guest name post-mount
+    if (params.get("to")) setName(guest);
+  }, [guest]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
