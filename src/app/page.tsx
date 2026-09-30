@@ -102,7 +102,15 @@ export default function Home() {
           ))}
         </div>
       )}
-      <audio ref={audioRef} src="/music.mp3" loop />
+      <audio
+        ref={audioRef}
+        src="/music.mp3"
+        onEnded={(e) => {
+          const audio = e.currentTarget;
+          audio.currentTime = 154;
+          audio.play().catch(() => {});
+        }}
+      />
       {!opened ? (
         <Cover guest={guest} closing={closing} onOpen={openInvitation} />
       ) : (
