@@ -40,7 +40,24 @@ export default function Home() {
   const [guest, setGuest] = useState("Bapak/Ibu/Sdr/i");
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
-  const bgIndex = useScrollBackground(BEACH_PHOTOS.length);
+  const [beachPhotos, setBeachPhotos] = useState(BEACH_PHOTOS);
+  const [galleryPhotos, setGalleryPhotos] = useState(GALLERY_PHOTOS);
+  const [galleryPhotos2, setGalleryPhotos2] = useState(GALLERY_PHOTOS_2);
+  const bgIndex = useScrollBackground(beachPhotos.length);
+
+  useEffect(() => {
+    fetch("/api/photos")
+      .then((r) => r.json())
+      .then((data: Record<string, string[]>) => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
+        if (data.beach?.length) setBeachPhotos(data.beach);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
+        if (data.gallery1?.length) setGalleryPhotos(data.gallery1);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
+        if (data.gallery2?.length) setGalleryPhotos2(data.gallery2);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -88,7 +105,7 @@ export default function Home() {
     <main className="mx-auto w-full max-w-md min-h-screen relative overflow-hidden bg-background">
       {opened && (
         <div className="fixed inset-0 max-w-md mx-auto z-0">
-          {BEACH_PHOTOS.map((src, i) => (
+          {beachPhotos.map((src, i) => (
             <div
               key={src}
               className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-[opacity,transform] duration-[1800ms] ease-in-out will-change-transform"
@@ -112,10 +129,19 @@ export default function Home() {
         }}
       />
       {!opened ? (
-        <Cover guest={guest} closing={closing} onOpen={openInvitation} />
+        <Cover
+          guest={guest}
+          closing={closing}
+          onOpen={openInvitation}
+          beachPhotos={beachPhotos}
+        />
       ) : (
         <>
-          <Invitation guest={guest} />
+          <Invitation
+            guest={guest}
+            galleryPhotos={galleryPhotos}
+            galleryPhotos2={galleryPhotos2}
+          />
           <BottomNav />
           <FloatingTools playing={playing} onToggleMusic={toggleMusic} />
         </>
@@ -128,19 +154,21 @@ function Cover({
   guest,
   closing,
   onOpen,
+  beachPhotos,
 }: {
   guest: string;
   closing: boolean;
   onOpen: () => void;
+  beachPhotos: string[];
 }) {
   const [bgIndex, setBgIndex] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => {
-      setBgIndex((i) => (i + 1) % BEACH_PHOTOS.length);
+      setBgIndex((i) => (i + 1) % beachPhotos.length);
     }, 4000);
     return () => clearInterval(id);
-  }, []);
+  }, [beachPhotos.length]);
 
   return (
     <section
@@ -148,7 +176,7 @@ function Cover({
         closing ? "opacity-0 scale-110" : "opacity-100 scale-100"
       }`}
     >
-      {BEACH_PHOTOS.map((src, i) => (
+      {beachPhotos.map((src, i) => (
         <div
           key={src}
           className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
@@ -162,9 +190,9 @@ function Cover({
         className="absolute -right-4 -bottom-4 w-32 h-32 opacity-80 z-10"
       />
       <h1 className="relative z-10 w-full text-center font-script text-4xl gold-text leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
-        {couple.shortGroom}
+        <span>{couple.shortGroom} &amp;</span>
         <br />
-        <span>&amp; {couple.shortBride}</span>
+        {couple.shortBride}
       </h1>
       <div className="relative z-10 text-sm tracking-wide text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
         <p>Kepada Yth. Bapak/Ibu/Sdr/i</p>
@@ -181,14 +209,22 @@ function Cover({
   );
 }
 
-function Invitation({ guest }: { guest: string }) {
+function Invitation({
+  guest,
+  galleryPhotos,
+  galleryPhotos2,
+}: {
+  guest: string;
+  galleryPhotos: string[];
+  galleryPhotos2: string[];
+}) {
   return (
     <div className="relative z-10 pb-24 bg-background/70">
       <HeroSection />
       <CoupleSection />
       <EventSection />
       <StorySection />
-      <GallerySection />
+      <GallerySection photos={galleryPhotos} photos2={galleryPhotos2} />
       <WishesSection guest={guest} />
       <RsvpSection guest={guest} />
       <ClosingSection />
@@ -386,14 +422,14 @@ function PhotoCarousel({ photos }: { photos: string[] }) {
   );
 }
 
-function GallerySection() {
+function GallerySection({ photos, photos2 }: { photos: string[]; photos2: string[] }) {
   return (
     <section id="gallery" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
         <SectionTitle>Galeri Kami</SectionTitle>
-        <PhotoCarousel photos={GALLERY_PHOTOS} />
+        <PhotoCarousel photos={photos} />
         <div className="mt-10">
-          <PhotoCarousel photos={GALLERY_PHOTOS_2} />
+          <PhotoCarousel photos={photos2} />
         </div>
       </Reveal>
     </section>
@@ -407,9 +443,11 @@ function WishesSection({ guest }: { guest: string }) {
   const [giftOpen, setGiftOpen] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("wishes");
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading persisted client data post-mount
-    if (saved) setWishes(JSON.parse(saved));
+    fetch("/api/wishes")
+      .then((r) => r.json())
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- loading shared wishes from the DB post-mount
+      .then((data) => setWishes(data))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -418,14 +456,16 @@ function WishesSection({ guest }: { guest: string }) {
     if (params.get("to")) setName(guest);
   }, [guest]);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !message.trim()) return;
-    const next = [{ name, message }, ...wishes];
-    setWishes(next);
-    // ponytail: localStorage only persists per-device; move to a real DB if wishes must be shared across all guests
-    localStorage.setItem("wishes", JSON.stringify(next));
+    setWishes([{ name, message }, ...wishes]);
     setMessage("");
+    await fetch("/api/wishes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, message }),
+    });
   }
 
   return (
@@ -541,17 +581,30 @@ function RsvpSection({ guest }: { guest: string }) {
   const [guests, setGuests] = useState(1);
 
   useEffect(() => {
+    fetch("/api/rsvp")
+      .then((r) => r.json())
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- loading shared RSVP list from the DB post-mount
+      .then((data) => setList(data))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- prefill from URL guest name post-mount
     if (params.get("to")) setName(guest);
   }, [guest]);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
     setList([{ name, attend, guests }, ...list]);
     setName("");
     setGuests(1);
+    await fetch("/api/rsvp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, attend, guests }),
+    });
   }
 
   return (
