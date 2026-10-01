@@ -25,3 +25,16 @@ export async function POST(req: Request) {
 
   return Response.json({ ok: true, url: blob.url });
 }
+
+export async function DELETE(req: Request) {
+  const { slot, index } = await req.json();
+  if (!slot || typeof index !== "number") {
+    return Response.json({ error: "slot and index required" }, { status: 400 });
+  }
+  const s = sql();
+  const rows = await s`select urls from photos where slot = ${slot}`;
+  const urls: string[] = rows[0]?.urls ?? [];
+  urls.splice(index, 1);
+  await s`update photos set urls = ${urls} where slot = ${slot}`;
+  return Response.json({ ok: true });
+}

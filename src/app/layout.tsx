@@ -15,8 +15,13 @@ const serifFont = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Feriman & Ayu Natasya - Undangan Pernikahan",
+  title: "Undangan Digital Feri & Ayu",
   description: "Undangan pernikahan Feriman & Ayu Natasya",
+  openGraph: {
+    title: "Undangan Digital Feri & Ayu",
+    description: "Undangan pernikahan Feriman & Ayu Natasya",
+    images: ["/images/bg-beach.jpg"],
+  },
 };
 
 export const viewport: Viewport = {

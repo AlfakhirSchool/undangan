@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 type Wish = { id: number; name: string; message: string; created_at: string };
-type Rsvp = { name: string; attend: string; guests: number; created_at: string };
+type Rsvp = { id: number; name: string; attend: string; guests: number; created_at: string };
 type Contribution = {
   id: number;
   name: string;
@@ -15,6 +15,13 @@ type Contribution = {
   created_at: string;
 };
 type Invitee = { id: number; name: string; type: "digital" | "fisik"; category: string };
+type BudgetItem = {
+  id: number;
+  name: string;
+  cost: number | null;
+  bought: boolean;
+  note: string | null;
+};
 
 const PHOTO_SLOTS: { slot: string; label: string; count: number }[] = [
   { slot: "beach", label: "🌅 Cover / Background", count: 4 },
@@ -23,7 +30,7 @@ const PHOTO_SLOTS: { slot: string; label: string; count: number }[] = [
 ];
 
 export default function AdminPage() {
-  const [tab, setTab] = useState<"tamu" | "undangan" | "foto">("tamu");
+  const [tab, setTab] = useState<"tamu" | "undangan" | "foto" | "budget">("tamu");
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [rsvps, setRsvps] = useState<Rsvp[]>([]);
   const [contributions, setContributions] = useState<Contribution[]>([]);
@@ -43,6 +50,8 @@ export default function AdminPage() {
   const [newCategory, setNewCategory] = useState(false);
   const [tamuSub, setTamuSub] = useState<"rsvp" | "ucapan" | "kado">("rsvp");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
+  const [budgetForm, setBudgetForm] = useState({ name: "", cost: "", note: "" });
 
   function loadGuests() {
     fetch("/api/admin/guests")
@@ -66,10 +75,51 @@ export default function AdminPage() {
       .then(setInvitees);
   }
 
+  function loadBudget() {
+    fetch("/api/admin/budget")
+      .then((r) => r.json())
+      .then(setBudgetItems);
+  }
+
+  async function addBudgetItem(e: React.FormEvent) {
+    e.preventDefault();
+    if (!budgetForm.name.trim()) return;
+    await fetch("/api/admin/budget", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: budgetForm.name,
+        cost: budgetForm.cost ? Number(budgetForm.cost) : null,
+        note: budgetForm.note || null,
+      }),
+    });
+    setBudgetForm({ name: "", cost: "", note: "" });
+    loadBudget();
+  }
+
+  async function toggleBought(id: number, bought: boolean) {
+    await fetch("/api/admin/budget", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, bought }),
+    });
+    loadBudget();
+  }
+
+  async function deleteBudgetItem(id: number) {
+    await fetch("/api/admin/budget", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    loadBudget();
+  }
+
   useEffect(() => {
     loadGuests();
     loadPhotos();
     loadInvitees();
+    loadBudget();
   }, []);
 
   async function addInvitee(e: React.FormEvent) {
@@ -137,6 +187,15 @@ export default function AdminPage() {
     loadGuests();
   }
 
+  async function deleteRsvp(id: number) {
+    await fetch("/api/rsvp", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    loadGuests();
+  }
+
   async function deleteContribution(id: number) {
     await fetch("/api/admin/contributions", {
       method: "DELETE",
@@ -164,9 +223,23 @@ export default function AdminPage() {
     loadPhotos();
   }
 
-  const totalUang = contributions
+  async function deletePhoto(slot: string, index: number) {
+    await fetch("/api/admin/photos", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slot, index }),
+    });
+    loadPhotos();
+  }
+
+  const totalBelum = contributions
     .filter((c) => !c.done)
     .reduce((sum, c) => sum + (c.amount ?? 0), 0);
+  const totalSudah = contributions
+    .filter((c) => c.done)
+    .reduce((sum, c) => sum + (c.amount ?? 0), 0);
+  const countBelum = contributions.filter((c) => !c.done).length;
+  const countSudah = contributions.filter((c) => c.done).length;
 
   return (
     <main className="min-h-screen bg-background px-5 py-6 pb-16 max-w-2xl">
@@ -254,6 +327,15 @@ export default function AdminPage() {
           >
             🖼️ Foto
           </button>
+          <button
+            onClick={() => {
+              setTab("budget");
+              setMenuOpen(false);
+            }}
+            className={`text-left px-4 py-2 rounded-md text-sm ${tab === "budget" ? "bg-black text-white" : "border"}`}
+          >
+            💰 Budget
+          </button>
         </div>
       </div>
 
@@ -263,18 +345,26 @@ export default function AdminPage() {
             <section>
               <h2 className="font-semibold mb-2">✅ RSVP ({rsvps.length})</h2>
               <div className="space-y-2">
-                {rsvps.map((r, i) => (
+                {rsvps.map((r) => (
                   <div
-                    key={i}
+                    key={r.id}
                     className="flex items-center justify-between gap-2 border rounded-lg px-3 py-2 text-sm"
                   >
                     <span className="flex items-center gap-2 min-w-0">
                       <span>{r.attend === "Hadir" ? "✅" : "❌"}</span>
                       <span className="truncate">{r.name}</span>
                     </span>
-                    <span className="opacity-70 text-xs shrink-0">
-                      {r.attend}
-                      {r.attend === "Hadir" ? ` (${r.guests})` : ""}
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span className="opacity-70 text-xs">
+                        {r.attend}
+                        {r.attend === "Hadir" ? ` (${r.guests})` : ""}
+                      </span>
+                      <button
+                        onClick={() => deleteRsvp(r.id)}
+                        className="text-red-600 text-xs"
+                      >
+                        Hapus
+                      </button>
                     </span>
                   </div>
                 ))}
@@ -311,9 +401,17 @@ export default function AdminPage() {
 
           {tamuSub === "kado" && (
             <section>
-              <h2 className="font-semibold mb-2">
-                🎁 Kado & Uang (total: Rp{totalUang.toLocaleString("id-ID")})
-              </h2>
+              <h2 className="font-semibold mb-2">🎁 Kado & Uang</h2>
+              <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+                <div className="border rounded-lg px-3 py-2">
+                  <p className="opacity-60 text-xs">Belum ({countBelum})</p>
+                  <p className="font-semibold">Rp{totalBelum.toLocaleString("id-ID")}</p>
+                </div>
+                <div className="border rounded-lg px-3 py-2">
+                  <p className="opacity-60 text-xs">Sudah ({countSudah})</p>
+                  <p className="font-semibold">Rp{totalSudah.toLocaleString("id-ID")}</p>
+                </div>
+              </div>
               <form onSubmit={addContribution} className="grid grid-cols-2 gap-2 mb-4 text-sm">
                 <input
                   placeholder="Nama tamu"
@@ -541,10 +639,23 @@ export default function AdminPage() {
                     const url = photos[slot]?.[i];
                     return (
                       <label key={i} className="block cursor-pointer">
-                        <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden mb-1 border">
+                        <div className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden mb-1 border">
                           {url && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={url} alt="" className="w-full h-full object-cover" />
+                            <>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={url} alt="" className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  deletePhoto(slot, i);
+                                }}
+                                className="absolute top-1 right-1 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center"
+                              >
+                                ✕
+                              </button>
+                            </>
                           )}
                         </div>
                         <input
@@ -580,6 +691,111 @@ export default function AdminPage() {
             );
           })}
         </div>
+      )}
+
+      {tab === "budget" && (
+        <section>
+          <h2 className="font-semibold mb-2">💰 Budget Pernikahan</h2>
+          <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+            <div className="border rounded-lg px-3 py-2">
+              <p className="opacity-60 text-xs">
+                Belum dibeli ({budgetItems.filter((b) => !b.bought).length})
+              </p>
+              <p className="font-semibold">
+                Rp
+                {budgetItems
+                  .filter((b) => !b.bought)
+                  .reduce((sum, b) => sum + (b.cost ?? 0), 0)
+                  .toLocaleString("id-ID")}
+              </p>
+            </div>
+            <div className="border rounded-lg px-3 py-2">
+              <p className="opacity-60 text-xs">
+                Sudah dibeli ({budgetItems.filter((b) => b.bought).length})
+              </p>
+              <p className="font-semibold">
+                Rp
+                {budgetItems
+                  .filter((b) => b.bought)
+                  .reduce((sum, b) => sum + (b.cost ?? 0), 0)
+                  .toLocaleString("id-ID")}
+              </p>
+            </div>
+          </div>
+          <form onSubmit={addBudgetItem} className="grid grid-cols-2 gap-2 mb-4 text-sm">
+            <input
+              placeholder="Nama kebutuhan (mis. Katering, Dekorasi)"
+              value={budgetForm.name}
+              onChange={(e) => setBudgetForm({ ...budgetForm, name: e.target.value })}
+              className="border rounded-md px-3 py-2 col-span-2"
+            />
+            <input
+              placeholder="Biaya (Rp)"
+              inputMode="numeric"
+              value={budgetForm.cost ? Number(budgetForm.cost).toLocaleString("id-ID") : ""}
+              onChange={(e) =>
+                setBudgetForm({ ...budgetForm, cost: e.target.value.replace(/\D/g, "") })
+              }
+              className="border rounded-md px-3 py-2 col-span-2"
+            />
+            <input
+              placeholder="Catatan"
+              value={budgetForm.note}
+              onChange={(e) => setBudgetForm({ ...budgetForm, note: e.target.value })}
+              className="border rounded-md px-3 py-2 col-span-2"
+            />
+            <button
+              type="submit"
+              className="col-span-2 bg-black text-white rounded-full px-4 py-2"
+            >
+              Tambah
+            </button>
+          </form>
+          <div className="space-y-2">
+            {budgetItems.map((b) => (
+              <div
+                key={b.id}
+                className={`flex justify-between items-center gap-2 border rounded-lg px-3 py-2 text-sm ${
+                  b.bought ? "opacity-50" : ""
+                }`}
+              >
+                <div className="min-w-0">
+                  <p
+                    className={`font-medium flex items-center gap-2 truncate ${
+                      b.bought ? "line-through" : ""
+                    }`}
+                  >
+                    <span>{b.bought ? "✅" : "🛒"}</span>
+                    {b.name}
+                  </p>
+                  <p className="opacity-60 text-xs pl-6 truncate">
+                    {b.cost ? `Rp${b.cost.toLocaleString("id-ID")}` : ""}
+                    {b.note ? ` · ${b.note}` : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => toggleBought(b.id, !b.bought)}
+                    className={`text-xs px-2 py-1 rounded-full border ${
+                      b.bought ? "bg-black text-white" : ""
+                    }`}
+                  >
+                    {b.bought ? "✓ Dibeli" : "Dibeli"}
+                  </button>
+                  <button
+                    onClick={() => deleteBudgetItem(b.id)}
+                    className="text-red-600 text-xs"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+            {budgetItems.length === 0 && (
+              <p className="opacity-60">Belum ada daftar kebutuhan.</p>
+            )}
+          </div>
+        </section>
       )}
     </main>
   );
