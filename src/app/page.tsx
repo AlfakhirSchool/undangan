@@ -109,7 +109,7 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-md min-h-dvh relative overflow-hidden bg-background">
+    <main className="invite-ui mx-auto w-full max-w-md min-h-dvh relative overflow-hidden bg-background">
       {opened && (
         <div className="fixed inset-0 max-w-md mx-auto z-0">
           {beachPhotos.map((src, i) => (
