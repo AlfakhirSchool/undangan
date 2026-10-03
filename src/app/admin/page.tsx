@@ -696,8 +696,8 @@ export default function AdminPage() {
                 </h3>
                 <div className="space-y-2">
                   {list.map((inv) => (
+                    <div key={inv.id}>
                     <div
-                      key={inv.id}
                       className="flex items-center justify-between gap-2 border rounded-lg px-3 py-2 text-sm"
                     >
                       <div className="min-w-0">
@@ -773,6 +773,7 @@ export default function AdminPage() {
                         </button>
                       </div>
                     )}
+                    </div>
                   ))}
                 </div>
               </div>
