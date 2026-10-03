@@ -9,7 +9,7 @@ export const couple = {
     name: "Ayu Natasya",
     order: "Putri Kedua dari",
     parents: "Bapak Marhadi & Ibu Ika Novita (Fitri)",
-    city: "Depok",
+    city: "Sawangan, Kota Depok",
   },
   shortGroom: "Feri",
   shortBride: "Ayu",
@@ -39,8 +39,8 @@ export const events = [
 ];
 
 export const giftAccounts = [
-  { bank: "BCA", number: "1234567890", name: "Feriman" },
-  { bank: "Mandiri", number: "0987654321", name: "Ayu Natasya" },
+  { bank: "BCA", number: "4561252232", name: "Feriman" },
+  { bank: "BCA", number: "8691548121", name: "Ayu Natasya" },
 ];
 
 export const story = [

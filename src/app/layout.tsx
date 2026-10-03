@@ -15,18 +15,21 @@ const serifFont = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://wedding-feri-ayu.vercel.app"),
   title: "Undangan Digital Feri & Ayu",
   description: "Undangan pernikahan Feriman & Ayu Natasya",
   openGraph: {
     title: "Undangan Digital Feri & Ayu",
     description: "Undangan pernikahan Feriman & Ayu Natasya",
-    images: ["/images/bg-beach.jpg"],
+    images: ["/icon.jpg"],
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

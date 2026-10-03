@@ -25,12 +25,13 @@ type BudgetItem = {
 
 const PHOTO_SLOTS: { slot: string; label: string; count: number }[] = [
   { slot: "beach", label: "🌅 Cover / Background", count: 4 },
+  { slot: "lamaran", label: "💍 Lamaran", count: 5 },
   { slot: "gallery1", label: "🖼️ Galeri 1", count: 3 },
   { slot: "gallery2", label: "🖼️ Galeri 2", count: 3 },
 ];
 
 export default function AdminPage() {
-  const [tab, setTab] = useState<"tamu" | "undangan" | "foto" | "budget">("tamu");
+  const [tab, setTab] = useState<"tamu" | "undangan" | "foto" | "budget">("budget");
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [rsvps, setRsvps] = useState<Rsvp[]>([]);
   const [contributions, setContributions] = useState<Contribution[]>([]);
@@ -148,15 +149,30 @@ export default function AdminPage() {
     return `${window.location.origin}/?${new URLSearchParams({ to: name }).toString()}`;
   }
 
-  function shareInvite(name: string) {
-    const url = inviteLink(name);
-    const text = `Undangan pernikahan Feriman & Ayu Natasya untuk ${name}\n${url}`;
+  function titleCase(s: string) {
+    return s.toLowerCase().replace(/(^|\s|\/|-)(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
+  }
+
+  function groupMessage(groupName = "anggota grup") {
+    return `Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nKepada Yth.\nBapak/Ibu/Saudara/i ${titleCase(groupName)}\n\nTanpa mengurangi rasa hormat, dengan memohon ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i sekalian untuk menghadiri acara pernikahan kami:\n\nFeriman & Ayu Natasya\n\nWaktu, tempat, dan informasi lengkap acara dapat dilihat melalui undangan digital berikut:\n${window.location.origin}/\n\nMerupakan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i sekalian berkenan hadir dan memberikan doa restu.\n\nMohon maaf apabila ada kekeliruan dalam penulisan. Terima kasih atas perhatian dan kehadirannya.\n\nWassalamu'alaikum Warahmatullahi Wabarakatuh\n\nHormat kami,\nFeriman & Ayu Natasya`;
+  }
+
+  function shareInvite(name: string, group = false) {
+    const text = group
+      ? groupMessage(name)
+      : `Assalamu'alaikum Warahmatullahi Wabarakatuh\n\nKepada Yth.\nBapak/Ibu/Saudara/i\n${titleCase(name)}\n\nTanpa mengurangi rasa hormat, dengan memohon ridho Allah SWT, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:\n\nFeriman & Ayu Natasya\n\nWaktu, tempat, dan informasi lengkap acara dapat dilihat melalui undangan digital berikut:\n${inviteLink(name)}\n\nMerupakan kebahagiaan bagi kami apabila berkenan hadir dan memberikan doa restu. Kehadiran Anda akan melengkapi hari bahagia kami.\n\nMohon maaf apabila ada kekeliruan dalam penulisan nama atau gelar. Terima kasih atas perhatian dan kehadirannya.\n\nWassalamu'alaikum Warahmatullahi Wabarakatuh\n\nHormat kami,\nFeriman & Ayu Natasya`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 
-  async function copyInviteLink(name: string) {
-    await navigator.clipboard.writeText(inviteLink(name));
+  async function copyInviteLink(name: string, group = false) {
+    await navigator.clipboard.writeText(group ? `${window.location.origin}/` : inviteLink(name));
     setCopiedFor(name);
+    setTimeout(() => setCopiedFor(null), 1500);
+  }
+
+  async function copyGroupText() {
+    await navigator.clipboard.writeText(groupMessage());
+    setCopiedFor("__group__");
     setTimeout(() => setCopiedFor(null), 1500);
   }
 
@@ -242,7 +258,7 @@ export default function AdminPage() {
   const countSudah = contributions.filter((c) => c.done).length;
 
   return (
-    <main className="min-h-screen bg-background px-5 py-6 pb-16 max-w-2xl">
+    <main className="min-h-dvh bg-background px-5 py-6 pb-16 max-w-2xl">
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => setMenuOpen(true)}
@@ -518,6 +534,12 @@ export default function AdminPage() {
             <h2 className="font-semibold mb-2">
               📋 Daftar Tamu Diundang ({invitees.length})
             </h2>
+            <button
+              onClick={copyGroupText}
+              className="mb-4 text-xs px-3 py-1.5 rounded-full border"
+            >
+              {copiedFor === "__group__" ? "Tersalin!" : "Salin Teks Grup"}
+            </button>
             <form onSubmit={addInvitee} className="grid grid-cols-2 gap-2 mb-4 text-sm">
               <input
                 placeholder="Nama tamu"
@@ -577,7 +599,9 @@ export default function AdminPage() {
                 (acc[inv.category] ??= []).push(inv);
                 return acc;
               }, {}),
-            ).map(([category, list]) => (
+            ).map(([category, list]) => {
+              const isGroup = category.trim().toLowerCase() === "grup";
+              return (
               <div key={category} className="mb-6">
                 <h3 className="text-xs font-semibold uppercase opacity-60 mb-2">
                   {category} ({list.length})
@@ -599,13 +623,13 @@ export default function AdminPage() {
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <button
-                          onClick={() => copyInviteLink(inv.name)}
+                          onClick={() => copyInviteLink(inv.name, isGroup)}
                           className="text-xs px-2 py-1 rounded-full border"
                         >
                           {copiedFor === inv.name ? "Tersalin!" : "Copy"}
                         </button>
                         <button
-                          onClick={() => shareInvite(inv.name)}
+                          onClick={() => shareInvite(inv.name, isGroup)}
                           className="text-xs px-2 py-1 rounded-full bg-green-600 text-white"
                         >
                           WA
@@ -621,7 +645,8 @@ export default function AdminPage() {
                   ))}
                 </div>
               </div>
-            ))}
+              );
+            })}
             {invitees.length === 0 && <p className="opacity-60">Belum ada tamu di daftar.</p>}
           </section>
         </div>

@@ -15,6 +15,10 @@ import { useScrollBackground } from "./useScrollBackground";
 import { googleCalendarLink, mapsLink } from "./calendar";
 import { FloralCorner } from "./Floral";
 
+function titleCase(s: string) {
+  return s.toLowerCase().replace(/(^|\s|\/|-)(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
+}
+
 const BEACH_PHOTOS = [
   "/images/bg-beach.jpg",
   "/images/bg1.jpg",
@@ -41,6 +45,7 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [beachPhotos, setBeachPhotos] = useState(BEACH_PHOTOS);
+  const [lamaranPhotos, setLamaranPhotos] = useState<string[]>([]);
   const [galleryPhotos, setGalleryPhotos] = useState(GALLERY_PHOTOS);
   const [galleryPhotos2, setGalleryPhotos2] = useState(GALLERY_PHOTOS_2);
   const bgIndex = useScrollBackground(beachPhotos.length);
@@ -51,6 +56,8 @@ export default function Home() {
       .then((data: Record<string, string[]>) => {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
         if (data.beach?.length) setBeachPhotos(data.beach);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
+        if (data.lamaran?.length) setLamaranPhotos(data.lamaran);
         // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
         if (data.gallery1?.length) setGalleryPhotos(data.gallery1);
         // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
@@ -102,18 +109,16 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-md min-h-screen relative overflow-hidden bg-background">
+    <main className="mx-auto w-full max-w-md min-h-dvh relative overflow-hidden bg-background">
       {opened && (
         <div className="fixed inset-0 max-w-md mx-auto z-0">
           {beachPhotos.map((src, i) => (
             <div
               key={src}
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-[opacity,transform] duration-[1800ms] ease-in-out will-change-transform"
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-[1800ms] ease-in-out"
               style={{
                 backgroundImage: `url(${src})`,
                 opacity: i === bgIndex ? 1 : 0,
-                transform: i === bgIndex ? "scale(1.08)" : "scale(1)",
-                transitionDuration: i === bgIndex ? "1800ms, 6000ms" : "1800ms, 0ms",
               }}
             />
           ))}
@@ -139,6 +144,7 @@ export default function Home() {
         <>
           <Invitation
             guest={guest}
+            lamaranPhotos={lamaranPhotos}
             galleryPhotos={galleryPhotos}
             galleryPhotos2={galleryPhotos2}
           />
@@ -172,7 +178,7 @@ function Cover({
 
   return (
     <section
-      className={`min-h-screen flex flex-col items-center justify-center gap-5 px-8 py-10 text-center border border-gold/40 relative overflow-hidden transition-all duration-700 ease-in-out ${
+      className={`min-h-dvh flex flex-col items-center justify-center gap-5 px-8 py-10 text-center border border-gold/40 relative overflow-hidden transition-all duration-700 ease-in-out ${
         closing ? "opacity-0 scale-110" : "opacity-100 scale-100"
       }`}
     >
@@ -189,15 +195,17 @@ function Cover({
         flip
         className="absolute -right-4 -bottom-4 w-32 h-32 opacity-80 z-10"
       />
-      <h1 className="relative z-10 w-full text-center font-script text-4xl gold-text leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
-        <span>{couple.shortGroom} &amp;</span>
-        <br />
-        {couple.shortBride}
-      </h1>
-      <div className="relative z-10 text-sm tracking-wide text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
-        <p>Kepada Yth. Bapak/Ibu/Sdr/i</p>
-        <p className="font-semibold text-gold-light">{guest}</p>
-        <p>di Tempat</p>
+      <div className="relative z-10 flex flex-col items-center gap-3 rounded-2xl bg-black/35 px-6 py-5 backdrop-blur-[2px]">
+        <h1 className="w-full text-center font-script text-5xl gold-text leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+          {couple.shortGroom} &amp; {couple.shortBride}
+        </h1>
+        <div className="text-base tracking-wide text-white font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+          <p>Kepada Yth. Bapak/Ibu/Sdr/i</p>
+          <p className="font-semibold text-[#ffd9a8] text-lg">
+            {guest === "Bapak/Ibu/Sdr/i" ? guest : `${titleCase(guest)} & Partner`}
+          </p>
+          <p>di Tempat</p>
+        </div>
       </div>
       <button
         onClick={onOpen}
@@ -211,10 +219,12 @@ function Cover({
 
 function Invitation({
   guest,
+  lamaranPhotos,
   galleryPhotos,
   galleryPhotos2,
 }: {
   guest: string;
+  lamaranPhotos: string[];
   galleryPhotos: string[];
   galleryPhotos2: string[];
 }) {
@@ -224,6 +234,14 @@ function Invitation({
       <CoupleSection />
       <EventSection />
       <StorySection />
+      {lamaranPhotos.length > 0 && (
+        <section className="px-6 py-8 text-center scroll-mt-0">
+          <Reveal>
+            <SectionTitle>Lamaran</SectionTitle>
+            <PhotoCarousel photos={lamaranPhotos} />
+          </Reveal>
+        </section>
+      )}
       <GallerySection photos={galleryPhotos} photos2={galleryPhotos2} />
       <WishesSection guest={guest} />
       <RsvpSection guest={guest} />
@@ -384,6 +402,7 @@ function StorySection() {
 
 function PhotoCarousel({ photos }: { photos: string[] }) {
   const [active, setActive] = useState(0);
+  const touchStartX = useRef(0);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -392,9 +411,26 @@ function PhotoCarousel({ photos }: { photos: string[] }) {
     return () => clearInterval(id);
   }, [photos]);
 
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function onTouchEnd(e: React.TouchEvent) {
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) < 40) return;
+    setActive((i) => {
+      const next = delta < 0 ? i + 1 : i - 1;
+      return (next + photos.length) % photos.length;
+    });
+  }
+
   return (
     <>
-      <div className="card-3d relative w-full aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border">
+      <div
+        className="card-3d relative w-full max-w-xs mx-auto aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border touch-pan-y"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         {photos.map((src, i) => (
           <div
             key={src}
@@ -440,7 +476,6 @@ function WishesSection({ guest }: { guest: string }) {
   const [wishes, setWishes] = useState(initialWishes);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
-  const [giftOpen, setGiftOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/wishes")
@@ -493,12 +528,7 @@ function WishesSection({ guest }: { guest: string }) {
             KIRIM PESAN
           </button>
         </form>
-        <button
-          onClick={() => setGiftOpen(true)}
-          className="btn-3d w-full mb-5 px-4 py-2 rounded-full text-sm font-medium"
-        >
-          KIRIM KADO
-        </button>
+        <GiftAccounts />
         <div className="space-y-4 text-left max-h-72 overflow-y-auto pr-1">
           {wishes.map((w, i) => (
             <div key={i} className="border-b border-gold/20 pb-3">
@@ -510,12 +540,11 @@ function WishesSection({ guest }: { guest: string }) {
           ))}
         </div>
       </Reveal>
-      {giftOpen && <GiftModal onClose={() => setGiftOpen(false)} />}
     </section>
   );
 }
 
-function GiftModal({ onClose }: { onClose: () => void }) {
+function GiftAccounts() {
   const [copied, setCopied] = useState<string | null>(null);
 
   function copy(number: string) {
@@ -529,46 +558,27 @@ function GiftModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-6"
-      onClick={onClose}
-    >
-      <div
-        className="card-3d border gold-border rounded-lg p-6 w-full max-w-sm text-left"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="font-script text-2xl text-gold-light text-center mb-4">
-          Kirim Kado
-        </h3>
-        <div className="space-y-4">
-          {giftAccounts.map((g) => (
-            <div
-              key={g.number}
-              className="border gold-border rounded-md p-3 flex items-center justify-between"
-            >
-              <div>
-                <p className="text-sm font-semibold text-gold-light">
-                  {g.bank}
-                </p>
-                <p className="text-sm">{g.number}</p>
-                <p className="text-xs opacity-70">a.n {g.name}</p>
-              </div>
-              <button
-                onClick={() => copy(g.number)}
-                className="text-xs px-3 py-1 border gold-border rounded-full text-gold-light"
-              >
-                {copied === g.number ? "Tersalin" : "Salin"}
-              </button>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={onClose}
-          className="mt-6 w-full px-4 py-2 border gold-border rounded-full text-gold-light text-sm"
+    <div className="mb-5 space-y-3">
+      {giftAccounts.map((g) => (
+        <div
+          key={g.number}
+          className="card-3d border gold-border rounded-lg px-4 py-3 flex items-center justify-between gap-3"
         >
-          TUTUP
-        </button>
-      </div>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold tracking-wide text-gold-light uppercase">
+              {g.bank}
+            </p>
+            <p className="text-lg font-semibold tracking-wide mt-0.5">{g.number}</p>
+            <p className="text-xs opacity-70 mt-0.5">a.n {g.name}</p>
+          </div>
+          <button
+            onClick={() => copy(g.number)}
+            className="shrink-0 text-xs px-4 py-1.5 border gold-border rounded-full text-gold-light font-medium"
+          >
+            {copied === g.number ? "Tersalin" : "Salin"}
+          </button>
+        </div>
+      ))}
     </div>
   );
 }
@@ -681,7 +691,7 @@ function ClosingSection() {
       </p>
       <p className="text-sm mb-2">Salam</p>
 
-      <p className="text-[10px] opacity-40">Website by : undangan</p>
+      <p className="text-[10px] opacity-40">Website by : Feri</p>
     </section>
   );
 }

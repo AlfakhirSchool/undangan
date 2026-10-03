@@ -99,6 +99,7 @@ body {
     0 3px 6px -2px rgba(58, 36, 22, 0.4);
 }
 
+@media (hover: hover) {
 .btn-3d:hover {
   transform: translateY(-2px);
   box-shadow:
@@ -114,4 +115,5 @@ body {
     0 -6px 10px rgba(122, 74, 32, 0.08) inset,
     0 16px 28px -10px rgba(58, 36, 22, 0.4),
     0 4px 8px rgba(58, 36, 22, 0.18);
+}
 }
