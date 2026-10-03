@@ -51,6 +51,7 @@ export default function AdminPage() {
   const [newCategory, setNewCategory] = useState(false);
   const [tamuSub, setTamuSub] = useState<"rsvp" | "ucapan" | "kado">("rsvp");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [inviteeSearch, setInviteeSearch] = useState("");
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [budgetForm, setBudgetForm] = useState({ name: "", cost: "", note: "" });
 
@@ -550,6 +551,13 @@ export default function AdminPage() {
                 ⚠️ Nama ganda ({duplicateNames.length}): {duplicateNames.join(", ")}
               </div>
             )}
+            <input
+              type="search"
+              placeholder="🔍 Cari nama tamu..."
+              value={inviteeSearch}
+              onChange={(e) => setInviteeSearch(e.target.value)}
+              className="w-full border rounded-md px-3 py-2 text-sm mb-4"
+            />
             <button
               onClick={copyGroupText}
               className="mb-4 text-xs px-3 py-1.5 rounded-full border"
@@ -616,10 +624,12 @@ export default function AdminPage() {
               </button>
             </form>
             {Object.entries(
-              invitees.reduce<Record<string, Invitee[]>>((acc, inv) => {
-                (acc[inv.category] ??= []).push(inv);
-                return acc;
-              }, {}),
+              invitees
+                .filter((inv) => normName(inv.name).includes(normName(inviteeSearch)))
+                .reduce<Record<string, Invitee[]>>((acc, inv) => {
+                  (acc[inv.category] ??= []).push(inv);
+                  return acc;
+                }, {}),
             ).map(([category, list]) => {
               const isGroup = category.trim().toLowerCase() === "grup";
               return (
@@ -637,6 +647,11 @@ export default function AdminPage() {
                         <p className="font-medium flex items-center gap-2 truncate">
                           <span>{inv.type === "digital" ? "📱" : "📄"}</span>
                           {inv.name}
+                          {(nameCount[normName(inv.name)] ?? 0) > 1 && (
+                            <span className="text-[10px] font-semibold uppercase text-red-700 border border-red-400 bg-red-50 rounded-full px-2 py-0.5">
+                              Ganda
+                            </span>
+                          )}
                         </p>
                         <p className="opacity-60 text-xs pl-6">
                           {inv.type === "digital" ? "Digital" : "Fisik"}
