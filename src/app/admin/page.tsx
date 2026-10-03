@@ -270,7 +270,7 @@ export default function AdminPage() {
   const countSudah = contributions.filter((c) => c.done).length;
 
   return (
-    <main className="min-h-dvh bg-background px-5 py-6 pb-16 max-w-2xl">
+    <main className="admin-ui min-h-dvh bg-background px-5 py-6 pb-16 max-w-2xl">
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => setMenuOpen(true)}
