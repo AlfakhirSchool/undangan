@@ -14,6 +14,15 @@ export async function POST(req: Request) {
   return Response.json({ ok: true });
 }
 
+export async function PATCH(req: Request) {
+  const { id, name, type, category } = await req.json();
+  if (!name?.trim() || (type !== "digital" && type !== "fisik")) {
+    return Response.json({ error: "invalid payload" }, { status: 400 });
+  }
+  await sql()`update invitees set name = ${name.trim()}, type = ${type}, category = ${category?.trim() || "Umum"} where id = ${id}`;
+  return Response.json({ ok: true });
+}
+
 export async function DELETE(req: Request) {
   const { id } = await req.json();
   await sql()`delete from invitees where id = ${id}`;

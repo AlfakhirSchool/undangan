@@ -53,6 +53,7 @@ export default function AdminPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [inviteeSearch, setInviteeSearch] = useState("");
   const [replyOpen, setReplyOpen] = useState<number | null>(null);
+  const [editInvitee, setEditInvitee] = useState<Invitee | null>(null);
   const [replyDraft, setReplyDraft] = useState("");
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [budgetForm, setBudgetForm] = useState({ name: "", cost: "", note: "" });
@@ -147,6 +148,17 @@ export default function AdminPage() {
     });
     setInviteeForm({ name: "", type: "digital", category: inviteeForm.category });
     setNewCategory(false);
+    loadInvitees();
+  }
+
+  async function saveInvitee() {
+    if (!editInvitee || !editInvitee.name.trim()) return;
+    await fetch("/api/admin/invitees", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editInvitee),
+    });
+    setEditInvitee(null);
     loadInvitees();
   }
 
@@ -704,6 +716,12 @@ export default function AdminPage() {
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <button
+                          onClick={() => setEditInvitee(editInvitee?.id === inv.id ? null : { ...inv })}
+                          className="text-xs px-2 py-1 rounded-full border"
+                        >
+                          Ubah
+                        </button>
+                        <button
                           onClick={() => copyInviteLink(inv.name, isGroup)}
                           className="text-xs px-2 py-1 rounded-full border"
                         >
@@ -723,6 +741,38 @@ export default function AdminPage() {
                         </button>
                       </div>
                     </div>
+                    {editInvitee?.id === inv.id && (
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                        <input
+                          value={editInvitee.name}
+                          onChange={(e) => setEditInvitee({ ...editInvitee, name: e.target.value })}
+                          placeholder="Nama tamu"
+                          className="border rounded-md px-3 py-2 col-span-2"
+                        />
+                        <input
+                          value={editInvitee.category}
+                          onChange={(e) => setEditInvitee({ ...editInvitee, category: e.target.value })}
+                          placeholder="Kategori"
+                          className="border rounded-md px-3 py-2"
+                        />
+                        <select
+                          value={editInvitee.type}
+                          onChange={(e) =>
+                            setEditInvitee({ ...editInvitee, type: e.target.value as "digital" | "fisik" })
+                          }
+                          className="border rounded-md px-3 py-2"
+                        >
+                          <option value="digital">Undangan Digital</option>
+                          <option value="fisik">Undangan Fisik</option>
+                        </select>
+                        <button
+                          onClick={saveInvitee}
+                          className="col-span-2 bg-black text-white rounded-full px-4 py-2"
+                        >
+                          Simpan perubahan
+                        </button>
+                      </div>
+                    )}
                   ))}
                 </div>
               </div>
