@@ -1,7 +1,7 @@
 import { sql } from "@/lib/db";
 
 export async function GET() {
-  const rows = await sql()`select id, name, type, category from invitees order by category asc, name asc`;
+  const rows = await sql()`select id, name, type, category, sent from invitees order by category asc, name asc`;
   return Response.json(rows);
 }
 
@@ -15,7 +15,12 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const { id, name, type, category } = await req.json();
+  const body = await req.json();
+  const { id, name, type, category } = body;
+  if (typeof body.sent === "boolean") {
+    await sql()`update invitees set sent = ${body.sent} where id = ${id}`;
+    return Response.json({ ok: true });
+  }
   if (!name?.trim() || (type !== "digital" && type !== "fisik")) {
     return Response.json({ error: "invalid payload" }, { status: 400 });
   }

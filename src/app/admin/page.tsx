@@ -14,7 +14,7 @@ type Contribution = {
   done: boolean;
   created_at: string;
 };
-type Invitee = { id: number; name: string; type: "digital" | "fisik"; category: string };
+type Invitee = { id: number; name: string; type: "digital" | "fisik"; category: string; sent: boolean };
 type BudgetItem = {
   id: number;
   name: string;
@@ -159,6 +159,15 @@ export default function AdminPage() {
       body: JSON.stringify(editInvitee),
     });
     setEditInvitee(null);
+    loadInvitees();
+  }
+
+  async function toggleSent(id: number, sent: boolean) {
+    await fetch("/api/admin/invitees", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, sent }),
+    });
     loadInvitees();
   }
 
@@ -704,6 +713,11 @@ export default function AdminPage() {
                         <p className="font-medium flex items-center gap-2 truncate">
                           <span>{inv.type === "digital" ? "📱" : "📄"}</span>
                           {inv.name}
+                          {inv.sent && (
+                            <span className="text-[10px] font-semibold uppercase text-green-700 border border-green-600 bg-green-50 rounded-full px-2 py-0.5">
+                              Sudah dishare
+                            </span>
+                          )}
                           {(nameCount[normName(inv.name)] ?? 0) > 1 && (
                             <span className="text-[10px] font-semibold uppercase text-red-700 border border-red-400 bg-red-50 rounded-full px-2 py-0.5">
                               Ganda
@@ -715,6 +729,12 @@ export default function AdminPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => toggleSent(inv.id, !inv.sent)}
+                          className={`text-xs px-2 py-1 rounded-full border ${inv.sent ? "bg-green-600 text-white border-green-600" : ""}`}
+                        >
+                          {inv.sent ? "✓ Dishare" : "Tandai"}
+                        </button>
                         <button
                           onClick={() => setEditInvitee(editInvitee?.id === inv.id ? null : { ...inv })}
                           className="text-xs px-2 py-1 rounded-full border"
