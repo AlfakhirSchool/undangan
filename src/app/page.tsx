@@ -42,6 +42,7 @@ export default function Home() {
   const [opened, setOpened] = useState(false);
   const [closing, setClosing] = useState(false);
   const [guest, setGuest] = useState("Bapak/Ibu/Sdr/i");
+  const [nameLocked, setNameLocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [beachPhotos, setBeachPhotos] = useState(BEACH_PHOTOS);
@@ -70,7 +71,10 @@ export default function Home() {
     const params = new URLSearchParams(window.location.search);
     const to = params.get("to");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- must run post-mount to avoid SSR/client hydration mismatch on window.location
-    if (to) setGuest(to.replace(/\+/g, " "));
+    if (to) {
+      setGuest(to.replace(/\+/g, " "));
+      setNameLocked(true);
+    }
   }, []);
 
   function fadeInMusic(audio: HTMLAudioElement) {
@@ -144,6 +148,7 @@ export default function Home() {
         <>
           <Invitation
             guest={guest}
+            nameLocked={nameLocked}
             lamaranPhotos={lamaranPhotos}
             galleryPhotos={galleryPhotos}
             galleryPhotos2={galleryPhotos2}
@@ -219,11 +224,13 @@ function Cover({
 
 function Invitation({
   guest,
+  nameLocked,
   lamaranPhotos,
   galleryPhotos,
   galleryPhotos2,
 }: {
   guest: string;
+  nameLocked: boolean;
   lamaranPhotos: string[];
   galleryPhotos: string[];
   galleryPhotos2: string[];
@@ -243,8 +250,8 @@ function Invitation({
         </section>
       )}
       <GallerySection photos={galleryPhotos} photos2={galleryPhotos2} />
-      <WishesSection guest={guest} />
-      <RsvpSection guest={guest} />
+      <WishesSection guest={guest} nameLocked={nameLocked} />
+      <RsvpSection guest={guest} nameLocked={nameLocked} />
       <ClosingSection />
     </div>
   );
@@ -472,7 +479,7 @@ function GallerySection({ photos, photos2 }: { photos: string[]; photos2: string
   );
 }
 
-function WishesSection({ guest }: { guest: string }) {
+function WishesSection({ guest, nameLocked }: { guest: string; nameLocked: boolean }) {
   const [wishes, setWishes] = useState<{ name: string; message: string; reply?: string | null }[]>(initialWishes);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
@@ -511,8 +518,9 @@ function WishesSection({ guest }: { guest: string }) {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
+            readOnly={nameLocked}
             placeholder="Nama"
-            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm"
+            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm read-only:opacity-70"
           />
           <textarea
             value={message}
@@ -588,7 +596,7 @@ function GiftAccounts() {
   );
 }
 
-function RsvpSection({ guest }: { guest: string }) {
+function RsvpSection({ guest, nameLocked }: { guest: string; nameLocked: boolean }) {
   type Rsvp = { name: string; attend: "Hadir" | "Tidak Hadir"; guests: number };
   const [list, setList] = useState<Rsvp[]>([]);
   const [name, setName] = useState("");
@@ -630,8 +638,9 @@ function RsvpSection({ guest }: { guest: string }) {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
+            readOnly={nameLocked}
             placeholder="Nama"
-            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm"
+            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm read-only:opacity-70"
           />
           <div className="flex gap-3">
             {(["Hadir", "Tidak Hadir"] as const).map((opt) => (
