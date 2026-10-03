@@ -123,6 +123,17 @@ export default function AdminPage() {
     loadBudget();
   }, []);
 
+  const normName = (s: string) => s.trim().toLowerCase().replace(/\s+/g, " ");
+  const nameCount = invitees.reduce<Record<string, number>>((acc, inv) => {
+    const k = normName(inv.name);
+    acc[k] = (acc[k] ?? 0) + 1;
+    return acc;
+  }, {});
+  const duplicateNames = Object.entries(nameCount)
+    .filter(([, n]) => n > 1)
+    .map(([k]) => invitees.find((inv) => normName(inv.name) === k)?.name ?? k);
+  const formNameTaken = inviteeForm.name.trim() !== "" && (nameCount[normName(inviteeForm.name)] ?? 0) > 0;
+
   async function addInvitee(e: React.FormEvent) {
     e.preventDefault();
     if (!inviteeForm.name.trim()) return;
@@ -534,6 +545,11 @@ export default function AdminPage() {
             <h2 className="font-semibold mb-2">
               📋 Daftar Tamu Diundang ({invitees.length})
             </h2>
+            {duplicateNames.length > 0 && (
+              <div className="mb-4 border border-red-400 bg-red-50 text-red-700 rounded-lg px-3 py-2 text-sm">
+                ⚠️ Nama ganda ({duplicateNames.length}): {duplicateNames.join(", ")}
+              </div>
+            )}
             <button
               onClick={copyGroupText}
               className="mb-4 text-xs px-3 py-1.5 rounded-full border"
@@ -547,6 +563,11 @@ export default function AdminPage() {
                 onChange={(e) => setInviteeForm({ ...inviteeForm, name: e.target.value })}
                 className="border rounded-md px-3 py-2 col-span-2"
               />
+              {formNameTaken && (
+                <p className="col-span-2 text-xs text-red-700">
+                  ⚠️ Nama ini sudah ada di daftar.
+                </p>
+              )}
               {newCategory ? (
                 <input
                   autoFocus
