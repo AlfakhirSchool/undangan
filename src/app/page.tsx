@@ -473,7 +473,7 @@ function GallerySection({ photos, photos2 }: { photos: string[]; photos2: string
 }
 
 function WishesSection({ guest }: { guest: string }) {
-  const [wishes, setWishes] = useState(initialWishes);
+  const [wishes, setWishes] = useState<{ name: string; message: string; reply?: string | null }[]>(initialWishes);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
 
@@ -536,6 +536,11 @@ function WishesSection({ guest }: { guest: string }) {
                 {w.name}
               </p>
               <p className="text-sm opacity-80">{w.message}</p>
+              {w.reply && (
+                <p className="mt-2 pl-3 border-l-2 border-gold/40 text-xs opacity-80">
+                  ↳ Balasan dari Feri & Ayu: {w.reply}
+                </p>
+              )}
             </div>
           ))}
         </div>

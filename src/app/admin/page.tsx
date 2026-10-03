@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Wish = { id: number; name: string; message: string; created_at: string };
+type Wish = { id: number; name: string; message: string; reply: string | null; created_at: string };
 type Rsvp = { id: number; name: string; attend: string; guests: number; created_at: string };
 type Contribution = {
   id: number;
@@ -52,6 +52,8 @@ export default function AdminPage() {
   const [tamuSub, setTamuSub] = useState<"rsvp" | "ucapan" | "kado">("rsvp");
   const [menuOpen, setMenuOpen] = useState(false);
   const [inviteeSearch, setInviteeSearch] = useState("");
+  const [replyOpen, setReplyOpen] = useState<number | null>(null);
+  const [replyDraft, setReplyDraft] = useState("");
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [budgetForm, setBudgetForm] = useState({ name: "", cost: "", note: "" });
 
@@ -203,6 +205,17 @@ export default function AdminPage() {
       }),
     });
     setForm({ name: "", amount: "", item: "", note: "", source: "" });
+    loadGuests();
+  }
+
+  async function saveReply(id: number) {
+    await fetch("/api/wishes", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, reply: replyDraft }),
+    });
+    setReplyOpen(null);
+    setReplyDraft("");
     loadGuests();
   }
 
@@ -406,20 +419,52 @@ export default function AdminPage() {
               <h2 className="font-semibold mb-2">💌 Doa & Ucapan ({wishes.length})</h2>
               <div className="space-y-2 max-h-72 overflow-y-auto">
                 {wishes.map((w) => (
-                  <div
-                    key={w.id}
-                    className="flex justify-between items-start gap-2 border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <div className="min-w-0">
-                      <p className="font-medium">{w.name}</p>
-                      <p className="opacity-70 text-xs">{w.message}</p>
+                  <div key={w.id} className="border rounded-lg px-3 py-2 text-sm">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium">{w.name}</p>
+                        <p className="opacity-70 text-xs">{w.message}</p>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button
+                          onClick={() => {
+                            setReplyOpen(replyOpen === w.id ? null : w.id);
+                            setReplyDraft(w.reply ?? "");
+                          }}
+                          className="text-xs px-2 py-1 rounded-full border"
+                        >
+                          Balas
+                        </button>
+                        <button
+                          onClick={() => deleteWish(w.id)}
+                          className="text-red-600 text-xs"
+                        >
+                          Hapus
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => deleteWish(w.id)}
-                      className="text-red-600 text-xs shrink-0"
-                    >
-                      Hapus
-                    </button>
+                    {w.reply && replyOpen !== w.id && (
+                      <p className="mt-2 pl-3 border-l-2 text-xs opacity-80">
+                        ↳ Balasan: {w.reply}
+                      </p>
+                    )}
+                    {replyOpen === w.id && (
+                      <div className="mt-2 space-y-2">
+                        <textarea
+                          value={replyDraft}
+                          onChange={(e) => setReplyDraft(e.target.value)}
+                          rows={2}
+                          placeholder="Tulis balasan..."
+                          className="w-full border rounded-md px-3 py-2 text-xs"
+                        />
+                        <button
+                          onClick={() => saveReply(w.id)}
+                          className="text-xs px-3 py-1 rounded-full bg-black text-white"
+                        >
+                          Simpan balasan
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
                 {wishes.length === 0 && <p className="opacity-60">Belum ada ucapan.</p>}
