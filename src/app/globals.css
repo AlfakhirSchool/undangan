@@ -137,3 +137,14 @@ body {
 .invite-ui a {
   transition: transform 0.1s ease, opacity 0.15s ease;
 }
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
