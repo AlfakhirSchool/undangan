@@ -195,7 +195,7 @@ function Cover({
         flip
         className="absolute -right-4 -bottom-4 w-32 h-32 opacity-80 z-10"
       />
-      <div className="relative z-10 flex flex-col items-center gap-3 rounded-2xl bg-black/35 px-6 py-5 backdrop-blur-[2px]">
+      <div className="relative z-10 flex flex-col items-center gap-3">
         <h1 className="w-full text-center font-script text-5xl gold-text leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
           {couple.shortGroom} &amp; {couple.shortBride}
         </h1>
