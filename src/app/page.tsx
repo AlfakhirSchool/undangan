@@ -691,6 +691,34 @@ function PhotoCarousel({ photos }: { photos: string[] }) {
   );
 }
 
+function VideoClip({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) v.play().catch(() => {});
+        else v.pause();
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <video
+      ref={ref}
+      src={src}
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      className="w-full aspect-[4/5] object-cover rounded-xl border gold-border shadow-md"
+    />
+  );
+}
+
 function GallerySection({ photos, photos2 }: { photos: string[]; photos2: string[] }) {
   return (
     <section id="gallery" className="px-6 py-8 text-center scroll-mt-0">
@@ -699,6 +727,9 @@ function GallerySection({ photos, photos2 }: { photos: string[]; photos2: string
         <PhotoCarousel photos={photos} />
         <div className="mt-6">
           <PhotoCarousel photos={photos2} />
+        </div>
+        <div className="mt-6">
+          <VideoClip src="/videos/story.mp4" />
         </div>
       </Reveal>
     </section>
