@@ -22,7 +22,7 @@ const serifFont = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://wedding-feri-ayu.vercel.app"),
+  metadataBase: new URL("https://undangandigitalferiayu.vercel.app"),
   title: "Undangan Digital Feri & Ayu",
   description: "Undangan pernikahan Feriman & Ayu Natasya",
   openGraph: {
