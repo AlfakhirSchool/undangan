@@ -14,7 +14,9 @@ export function useReveal<T extends HTMLElement>() {
           observer.disconnect();
         }
       },
-      { threshold: 0.15 }
+      // Rasio luas tidak bisa dipakai: bagian yang sangat tinggi (mis. Our Story)
+      // tidak pernah mencapai 15% terlihat. Picu saat tepi atas masuk 88% layar.
+      { threshold: 0, rootMargin: "0px 0px -12% 0px" }
     );
     observer.observe(el);
     return () => observer.disconnect();

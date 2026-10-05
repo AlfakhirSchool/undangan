@@ -1,42 +1,63 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  couple,
-  weddingDateISO,
-  events,
-  story,
-  initialWishes,
-  giftAccounts,
-} from "./data";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { couple, weddingDateISO, events, story, giftAccounts } from "./data";
 import { useCountdown } from "./useCountdown";
-import { useReveal } from "./useReveal";
 import { useScrollBackground } from "./useScrollBackground";
 import { googleCalendarLink, mapsLink } from "./calendar";
-import { FloralCorner } from "./Floral";
+import { FloralCorner, FloralDivider } from "./Floral";
+import {
+  Hearts,
+  Reveal,
+  ScrollLine,
+  ScrollProgress,
+  Sparkles,
+  TiltCard,
+  useScrollMotion,
+} from "./effects";
+import { titleCase } from "@/lib/text";
+import { PHOTO_DEFAULTS, TEXT_DEFAULTS, type PhotoSlot } from "@/lib/site-content";
 
-function titleCase(s: string) {
-  return s.toLowerCase().replace(/(^|\s|\/|-)(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
+type SitePhotos = Record<PhotoSlot, string[]>;
+
+/**
+ * Gabungkan foto dari database dengan foto bawaan. Cover dan galeri yang dikosongkan
+ * tetap memakai bawaan (undangan tidak boleh tanpa cover). Slot lain yang dikosongkan
+ * dari dashboard sengaja dibiarkan kosong, dan bagiannya disembunyikan.
+ */
+function resolvePhotos(data: Record<string, string[]>): SitePhotos {
+  const listOrDefault = (slot: PhotoSlot) =>
+    data[slot]?.length ? data[slot] : PHOTO_DEFAULTS[slot];
+  const savedOrDefault = (slot: PhotoSlot) => (slot in data ? data[slot] : PHOTO_DEFAULTS[slot]);
+  return {
+    beach: listOrDefault("beach"),
+    gallery1: listOrDefault("gallery1"),
+    gallery2: listOrDefault("gallery2"),
+    lamaran: savedOrDefault("lamaran"),
+    hero: savedOrDefault("hero"),
+    break1: savedOrDefault("break1"),
+    break2: savedOrDefault("break2"),
+    closing: savedOrDefault("closing"),
+  };
 }
 
-const BEACH_PHOTOS = [
-  "/images/bg-beach.jpg",
-  "/images/bg1.jpg",
-  "/images/bg2.jpg",
-  "/images/bg3.jpg",
-];
+// Posisi/kecepatan kelopak deterministik supaya SSR dan klien sama.
+const PETALS = Array.from({ length: 14 }, (_, i) => ({
+  left: `${(i * 37 + 11) % 100}%`,
+  size: `${10 + ((i * 7) % 8)}px`,
+  dur: `${9 + ((i * 5) % 7)}s`,
+  delay: `-${((i * 1.7) % 12).toFixed(1)}s`,
+  drift: `${(i % 2 ? 1 : -1) * (20 + ((i * 13) % 40))}px`,
+}));
 
-const GALLERY_PHOTOS = [
-  "/images/gallery1.jpg",
-  "/images/gallery2.jpg",
-  "/images/gallery3.jpg",
-];
-
-const GALLERY_PHOTOS_2 = [
-  "/images/gallery4.jpg",
-  "/images/gallery5.jpg",
-  "/images/gallery6.jpg",
-];
+const WEDDING_DATE_SHORT = new Intl.DateTimeFormat("id-ID", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "Asia/Jakarta",
+})
+  .format(new Date(weddingDateISO))
+  .replace(/\//g, " · ");
 
 export default function Home() {
   const [opened, setOpened] = useState(false);
@@ -45,36 +66,27 @@ export default function Home() {
   const [nameLocked, setNameLocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [beachPhotos, setBeachPhotos] = useState(BEACH_PHOTOS);
-  const [lamaranPhotos, setLamaranPhotos] = useState<string[]>([]);
-  const [galleryPhotos, setGalleryPhotos] = useState(GALLERY_PHOTOS);
-  const [galleryPhotos2, setGalleryPhotos2] = useState(GALLERY_PHOTOS_2);
-  const bgIndex = useScrollBackground(beachPhotos.length);
+  const [photos, setPhotos] = useState<SitePhotos>(PHOTO_DEFAULTS);
+  const [texts, setTexts] = useState(TEXT_DEFAULTS);
+  const bgIndex = useScrollBackground(photos.beach.length);
 
   useEffect(() => {
     fetch("/api/photos")
       .then((r) => r.json())
-      .then((data: Record<string, string[]>) => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
-        if (data.beach?.length) setBeachPhotos(data.beach);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
-        if (data.lamaran?.length) setLamaranPhotos(data.lamaran);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
-        if (data.gallery1?.length) setGalleryPhotos(data.gallery1);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- loading admin-managed photo URLs post-mount
-        if (data.gallery2?.length) setGalleryPhotos2(data.gallery2);
-      })
+      .then((data: Record<string, string[]>) => setPhotos(resolvePhotos(data)))
+      .catch(() => {});
+    fetch("/api/texts")
+      .then((r) => r.json())
+      .then((data: Record<string, string>) => setTexts({ ...TEXT_DEFAULTS, ...data }))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const to = params.get("to");
+    const to = new URLSearchParams(window.location.search).get("to");
+    if (!to) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- must run post-mount to avoid SSR/client hydration mismatch on window.location
-    if (to) {
-      setGuest(to.replace(/\+/g, " "));
-      setNameLocked(true);
-    }
+    setGuest(to.replace(/\+/g, " "));
+    setNameLocked(true);
   }, []);
 
   function fadeInMusic(audio: HTMLAudioElement) {
@@ -109,25 +121,27 @@ export default function Home() {
   function openInvitation() {
     setClosing(true);
     toggleMusic();
-    setTimeout(() => setOpened(true), 700);
+    setTimeout(() => setOpened(true), 1500);
   }
 
   return (
-    <main className="invite-ui mx-auto w-full max-w-md min-h-dvh relative overflow-hidden bg-background">
-      {opened && (
-        <div className="fixed inset-0 max-w-md mx-auto z-0">
-          {beachPhotos.map((src, i) => (
-            <div
-              key={src}
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-[1800ms] ease-in-out"
-              style={{
-                backgroundImage: `url(${src})`,
-                opacity: i === bgIndex ? 1 : 0,
-              }}
-            />
-          ))}
-        </div>
-      )}
+    <main
+      className={`invite-ui mx-auto w-full max-w-md relative overflow-hidden bg-background ${
+        opened ? "min-h-dvh" : "h-dvh"
+      }`}
+    >
+      <div className="fixed inset-0 max-w-md mx-auto z-0">
+        {photos.beach.map((src, i) => (
+          <div
+            key={src}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-[1800ms] ease-in-out"
+            style={{
+              backgroundImage: `url(${src})`,
+              opacity: i === bgIndex ? 1 : 0,
+            }}
+          />
+        ))}
+      </div>
       <audio
         ref={audioRef}
         src="/music.mp3"
@@ -137,30 +151,30 @@ export default function Home() {
           audio.play().catch(() => {});
         }}
       />
-      {!opened ? (
+      <Invitation
+        revealed={closing}
+        guest={guest}
+        nameLocked={nameLocked}
+        photos={photos}
+        texts={texts}
+      />
+      <Sparkles className="fixed inset-0 z-30 mx-auto max-w-md" />
+      <ScrollProgress />
+      <BottomNav />
+      <FloatingTools playing={playing} onToggleMusic={toggleMusic} />
+      {!opened && (
         <Cover
           guest={guest}
           closing={closing}
           onOpen={openInvitation}
-          beachPhotos={beachPhotos}
+          beachPhotos={photos.beach}
         />
-      ) : (
-        <>
-          <Invitation
-            guest={guest}
-            nameLocked={nameLocked}
-            lamaranPhotos={lamaranPhotos}
-            galleryPhotos={galleryPhotos}
-            galleryPhotos2={galleryPhotos2}
-          />
-          <BottomNav />
-          <FloatingTools playing={playing} onToggleMusic={toggleMusic} />
-        </>
       )}
     </main>
   );
 }
 
+// Sampul undangan di atas isi undangan; saat dibuka berayun 3D seperti sampul buku.
 function Cover({
   guest,
   closing,
@@ -181,127 +195,266 @@ function Cover({
     return () => clearInterval(id);
   }, [beachPhotos.length]);
 
+  const named = guest !== "Bapak/Ibu/Sdr/i";
+
   return (
-    <section
-      className={`min-h-dvh flex flex-col items-center justify-center gap-5 px-8 py-10 text-center border border-gold/40 relative overflow-hidden transition-all duration-700 ease-in-out ${
-        closing ? "opacity-0 scale-110" : "opacity-100 scale-100"
-      }`}
-    >
-      {beachPhotos.map((src, i) => (
+    <div className={`book fixed inset-0 z-50 mx-auto max-w-md ${closing ? "is-open" : ""}`}>
+      <div className="book-cast pointer-events-none absolute inset-0" />
+      <div className="book-leaf absolute inset-0">
+        <section className="book-cover absolute inset-0 flex flex-col items-center justify-end gap-6 overflow-hidden border border-gold/40 bg-foreground px-8 pt-10 pb-16 text-center">
+          {beachPhotos.map((src, i) => (
+            <div
+              key={src}
+              className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
+              style={{ backgroundImage: `url(${src})`, opacity: i === bgIndex ? 1 : 0 }}
+            />
+          ))}
+          <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-black/10" />
+          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+            {PETALS.map((p, i) => (
+              <span
+                key={i}
+                className="petal"
+                style={
+                  {
+                    left: p.left,
+                    "--size": p.size,
+                    "--dur": p.dur,
+                    "--delay": p.delay,
+                    "--drift": p.drift,
+                  } as React.CSSProperties
+                }
+              />
+            ))}
+          </div>
+          <div className="absolute inset-y-0 left-0 z-10 w-3 bg-linear-to-r from-black/45 to-transparent" />
+          <FloralCorner className="absolute -left-4 -top-4 w-32 h-32 opacity-80 z-10" />
+          <FloralCorner
+            flip
+            className="absolute -right-4 -bottom-4 w-32 h-32 opacity-80 z-10"
+          />
+          <div className="relative z-10 flex flex-col items-center gap-2 text-white">
+            <p className="text-xs tracking-[0.3em] uppercase opacity-85">The Wedding Of</p>
+            <h1 className="font-script text-6xl leading-tight text-[#ffe3c2] drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
+              {couple.shortGroom} &amp; {couple.shortBride}
+            </h1>
+            <p className="text-sm tracking-wide opacity-90">{events[0].date}</p>
+            <div className="mt-5 text-sm opacity-95">
+              <p>Kepada Yth.</p>
+              <p className="font-semibold text-[#ffd9a8] text-lg my-0.5">
+                {named ? `${titleCase(guest)} & Partner` : "Bapak/Ibu/Saudara/i"}
+              </p>
+              <p>di Tempat</p>
+            </div>
+          </div>
+          <button
+            onClick={onOpen}
+            disabled={closing}
+            className="btn-3d relative z-10 mt-1 px-8 py-3 rounded-full tracking-widest text-sm font-medium"
+          >
+            BUKA UNDANGAN
+          </button>
+          <div className="book-shade pointer-events-none absolute inset-0 z-20" />
+        </section>
         <div
-          key={src}
-          className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
-          style={{ backgroundImage: `url(${src})`, opacity: i === bgIndex ? 1 : 0 }}
-        />
-      ))}
-      <div className="absolute inset-0 bg-black/35" />
-      <FloralCorner className="absolute -left-4 -top-4 w-32 h-32 opacity-80 z-10" />
-      <FloralCorner
-        flip
-        className="absolute -right-4 -bottom-4 w-32 h-32 opacity-80 z-10"
-      />
-      <div className="relative z-10 flex flex-col items-center gap-3">
-        <h1 className="w-full text-center font-script text-5xl gold-text leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-          {couple.shortGroom} &amp; {couple.shortBride}
-        </h1>
-        <div className="text-base tracking-wide text-white font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-          <p>Kepada Yth. Bapak/Ibu/Sdr/i</p>
-          <p className="font-semibold text-[#ffd9a8] text-lg">
-            {guest === "Bapak/Ibu/Sdr/i" ? guest : `${titleCase(guest)} & Partner`}
+          className="book-back absolute inset-0 flex items-center justify-center border border-gold/40"
+          aria-hidden="true"
+        >
+          <FloralCorner className="absolute -left-4 -top-4 w-32 h-32 opacity-60" />
+          <FloralCorner flip className="absolute -right-4 -bottom-4 w-32 h-32 opacity-60" />
+          <p className="font-script text-5xl gold-text">
+            {couple.shortGroom.charAt(0)} &amp; {couple.shortBride.charAt(0)}
           </p>
-          <p>di Tempat</p>
         </div>
       </div>
-      <button
-        onClick={onOpen}
-        className="relative z-10 mt-3 px-6 py-3 border border-white/70 rounded-full text-white tracking-widest text-sm hover:bg-white/10 transition"
-      >
-        BUKA UNDANGAN
-      </button>
-    </section>
+    </div>
   );
 }
 
 function Invitation({
+  revealed,
   guest,
   nameLocked,
-  lamaranPhotos,
-  galleryPhotos,
-  galleryPhotos2,
+  photos,
+  texts,
 }: {
+  revealed: boolean;
   guest: string;
   nameLocked: boolean;
-  lamaranPhotos: string[];
-  galleryPhotos: string[];
-  galleryPhotos2: string[];
+  photos: SitePhotos;
+  texts: typeof TEXT_DEFAULTS;
 }) {
   return (
-    <div className="relative z-10 pb-24 bg-background/70">
-      <HeroSection />
+    <div className="relative z-10 pb-24 bg-background/90">
+      <HeroSection revealed={revealed} photo={photos.hero[0]} />
       <CoupleSection />
+      <PhotoBreak src={photos.break1[0]} caption={texts.break1_caption} />
       <EventSection />
       <StorySection />
-      {lamaranPhotos.length > 0 && (
+      <PhotoBreak src={photos.break2[0]} caption={texts.break2_caption} />
+      {photos.lamaran.length > 0 && (
         <section className="px-6 py-8 text-center scroll-mt-0">
           <Reveal>
-            <SectionTitle>Lamaran</SectionTitle>
-            <PhotoCarousel photos={lamaranPhotos} />
+            <SectionTitle kicker="The Proposal">Lamaran</SectionTitle>
+            <PhotoCarousel photos={photos.lamaran} />
           </Reveal>
         </section>
       )}
-      <GallerySection photos={galleryPhotos} photos2={galleryPhotos2} />
+      <GallerySection photos={photos.gallery1} photos2={photos.gallery2} />
       <WishesSection guest={guest} nameLocked={nameLocked} />
       <RsvpSection guest={guest} nameLocked={nameLocked} />
-      <ClosingSection />
+      <GiftSection />
+      <ClosingSection photo={photos.closing[0]} />
     </div>
   );
 }
 
-function Reveal({ children }: { children: React.ReactNode }) {
-  const { ref, className } = useReveal<HTMLDivElement>();
+function SectionTitle({ kicker, children }: { kicker: string; children: React.ReactNode }) {
   return (
-    <div ref={ref} className={className}>
-      {children}
+    <div className="mb-7 text-center">
+      <p className="font-display text-xs font-semibold uppercase tracking-[0.45em] text-gold-light/80">
+        {kicker}
+      </p>
+      <h2 className="font-script gold-shimmer py-1 text-[2.7rem] leading-tight">{children}</h2>
+      <FloralDivider className="mt-1" />
     </div>
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="font-script text-4xl gold-text text-center mb-5">
-      {children}
-    </h2>
+/**
+ * Foto penuh selebar layar: zoom pelan (Ken Burns) + parallax (bergeser lebih lambat
+ * dari scroll). Tepinya memudar lewat mask supaya menyatu tanpa garis dengan latar.
+ * Mode `natural` menampilkan foto utuh sesuai rasionya (tanpa parallax dan hanya zoom
+ * sangat halus), untuk foto badan penuh yang tidak boleh terpotong.
+ */
+function FullBleedPhoto({
+  src,
+  className = "",
+  fadeTop = true,
+  natural = false,
+}: {
+  src: string;
+  className?: string;
+  fadeTop?: boolean;
+  natural?: boolean;
+}) {
+  const parallax = useScrollMotion<HTMLDivElement>(
+    (p) => `translate3d(0, ${(p * 0.1 * window.innerHeight).toFixed(1)}px, 0)`
   );
-}
-
-function HeroSection() {
-  const { days, hours, minutes, seconds } = useCountdown(weddingDateISO);
+  const mask = `linear-gradient(to bottom, ${fadeTop ? "transparent, black 22%" : "black"}, black 50%, transparent)`;
   return (
-    <section className="px-6 pt-10 pb-10 text-center relative">
-      <FloralCorner className="absolute -left-6 -top-4 w-28 h-28 opacity-70" />
-      <FloralCorner
-        flip
-        className="absolute -right-6 -top-4 w-28 h-28 opacity-70"
-      />
-      <p className="font-script text-2xl text-gold-light mb-1">Save The Date</p>
-      <p className="text-sm mb-6">Sabtu, 10 Oktober 2026</p>
-      <div className="flex justify-center gap-3">
-        {[
-          ["Hari", days],
-          ["Jam", hours],
-          ["Menit", minutes],
-          ["Detik", seconds],
-        ].map(([label, value]) => (
+    <div
+      className={`relative overflow-hidden ${className}`}
+      style={{ WebkitMaskImage: mask, maskImage: mask }}
+    >
+      {natural ? (
+        <div
+          className="kenburns-soft absolute inset-0 bg-cover bg-top"
+          style={{ backgroundImage: `url(${src})` }}
+        />
+      ) : (
+        <div ref={parallax} className="absolute inset-x-0 -top-[18%] -bottom-[18%]">
           <div
-            key={label as string}
-            className="card-3d border gold-border rounded-md w-16 py-2"
-          >
-            <div className="text-xl font-semibold text-gold-light">
-              {String(value).padStart(2, "0")}
-            </div>
-            <div className="text-[10px] uppercase tracking-wide">{label}</div>
+            className="kenburns absolute inset-0 bg-cover bg-[center_30%]"
+            style={{ backgroundImage: `url(${src})` }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PhotoBreak({ src, caption }: { src?: string; caption: string }) {
+  if (!src) return null;
+  return (
+    <figure className="relative my-2">
+      <FullBleedPhoto src={src} className="h-[62svh]" />
+      {caption && (
+        <figcaption className="relative -mt-16 px-8 text-center">
+          <Reveal variant="zoom">
+            <p className="font-script text-4xl text-gold-light">{caption}</p>
+          </Reveal>
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
+function HeroSection({ revealed, photo }: { revealed: boolean; photo?: string }) {
+  const { days, hours, minutes, seconds } = useCountdown(weddingDateISO);
+  const item = revealed ? "hero-item hero-item-in" : "hero-item";
+  const first = events[0];
+  const last = events[events.length - 1];
+  return (
+    <section className="relative text-center">
+      {photo && (
+        <div className="relative">
+          <FullBleedPhoto src={photo} fadeTop={false} natural className="aspect-[853/1280]" />
+          <div className="absolute inset-x-0 top-0 h-24 bg-linear-to-b from-black/25 to-transparent" />
+        </div>
+      )}
+      <div className={`relative px-6 ${photo ? "-mt-40" : "pt-24"}`}>
+        <p
+          className={`font-display text-xs font-semibold uppercase tracking-[0.5em] text-gold-light ${item}`}
+          style={{ transitionDelay: "0.4s" }}
+        >
+          The Wedding Of
+        </p>
+        <h1
+          className={`font-script gold-shimmer py-1 text-7xl leading-tight ${item}`}
+          style={{ transitionDelay: "0.65s" }}
+        >
+          {couple.shortGroom} &amp; {couple.shortBride}
+        </h1>
+        <p
+          className={`font-display text-sm font-semibold tracking-[0.45em] ${item}`}
+          style={{ transitionDelay: "0.95s" }}
+        >
+          {WEDDING_DATE_SHORT}
+        </p>
+      </div>
+      <div className="px-6 pt-12 pb-10">
+        <Reveal>
+          <p className="font-script text-3xl text-gold-light">Save The Date</p>
+          <p className="mb-5 text-sm">{first.date}</p>
+          <div className="flex justify-center gap-3">
+            {[
+              ["Hari", days],
+              ["Jam", hours],
+              ["Menit", minutes],
+              ["Detik", seconds],
+            ].map(([label, value]) => {
+              const text = String(value).padStart(2, "0");
+              return (
+                <div
+                  key={label as string}
+                  className="card-3d border gold-border rounded-md w-16 py-2"
+                >
+                  <div className="text-xl font-semibold text-gold-light">
+                    <span key={text} className="flip-digit">
+                      {text}
+                    </span>
+                  </div>
+                  <div className="text-[11px] uppercase tracking-wide">{label}</div>
+                </div>
+              );
+            })}
           </div>
-        ))}
+          <a
+            href={googleCalendarLink({
+              title: `Pernikahan ${couple.shortGroom} & ${couple.shortBride}`,
+              startISO: first.startISO,
+              endISO: last.endISO,
+              location: `${first.place}, ${first.address}`,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex items-center gap-2 rounded-full border gold-border px-5 py-2 text-xs font-semibold tracking-[0.2em] text-gold-light"
+          >
+            <IconCalendar className="h-3.5 w-3.5" />
+            SIMPAN TANGGAL
+          </a>
+        </Reveal>
       </div>
     </section>
   );
@@ -311,25 +464,45 @@ function CoupleSection() {
   return (
     <section id="mempelai" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
-        <SectionTitle>Mempelai</SectionTitle>
-        <p className="text-sm leading-relaxed mb-6 opacity-90">
-          Dengan mengucapkan syukur, kami mengundang Bapak/Ibu/Saudara/i untuk
-          menghadiri acara pernikahan kami.
+        <SectionTitle kicker="The Couple">Mempelai</SectionTitle>
+        <p className="mb-7 text-sm leading-relaxed opacity-90">
+          Dengan mengucapkan syukur, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara
+          pernikahan kami.
         </p>
-        <div className="space-y-6">
-          {[couple.groom, couple.bride].map((p) => (
-            <div key={p.name}>
-              <h3 className="font-script text-2xl text-gold-light">
-                <span className="text-4xl">{p.name.charAt(0)}</span>
-                {p.name.slice(1)}
-              </h3>
-              <p className="text-sm mt-2 opacity-90">{p.order}</p>
-              <p className="text-sm font-medium">{p.parents}</p>
-              <p className="text-sm opacity-80 mt-1">{p.city}</p>
-            </div>
-          ))}
-        </div>
       </Reveal>
+      {[couple.groom, couple.bride].map((p, i) => (
+        <Fragment key={p.name}>
+          {i === 1 && (
+            <Reveal variant="zoom">
+              <p className="font-script gold-shimmer my-2 py-1 text-6xl">&amp;</p>
+            </Reveal>
+          )}
+          <Reveal variant={i ? "right" : "left"}>
+            <TiltCard className="card-3d relative overflow-hidden rounded-2xl border gold-border px-5 py-8">
+              <span
+                className="font-script pointer-events-none absolute inset-0 flex select-none items-center justify-center text-[11rem] leading-none text-gold/10"
+                aria-hidden="true"
+              >
+                {p.name.charAt(0)}
+              </span>
+              <div className="relative">
+                <div className="mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full border-2 gold-border bg-linear-to-br from-[#fff7ec] to-[#f1e1cc] shadow-inner">
+                  <span className="font-script gold-text px-2 pt-2 text-5xl leading-none">
+                    {p.name.charAt(0)}
+                  </span>
+                </div>
+                <h3 className="font-script text-3xl text-gold-light">{p.name}</h3>
+                <p className="mt-2 text-[11px] uppercase tracking-[0.2em] opacity-70">{p.order}</p>
+                <p className="mt-1 text-sm font-semibold">{p.parents}</p>
+                <p className="mt-2 inline-flex items-center gap-1 text-xs opacity-75">
+                  <IconPin />
+                  {p.city}
+                </p>
+              </div>
+            </TiltCard>
+          </Reveal>
+        </Fragment>
+      ))}
     </section>
   );
 }
@@ -338,44 +511,67 @@ function EventSection() {
   return (
     <section id="acara" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
-        <SectionTitle>Detail Acara</SectionTitle>
-        <div className="space-y-5">
-          {events.map((e) => (
-            <div key={e.title} className="card-3d border gold-border rounded-lg p-6">
-              <h3 className="font-script text-2xl text-gold-light mb-2">
-                {e.title}
-              </h3>
-              <p className="text-sm">{e.date}</p>
-              <p className="text-sm mb-2">{e.time}</p>
-              <p className="text-sm font-semibold">{e.place}</p>
-              <p className="text-sm opacity-85 mb-4">{e.address}</p>
-              <div className="flex justify-center gap-3 text-xs">
-                <a
-                  href={mapsLink(`${e.place} ${e.address}`)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 border gold-border rounded-full text-gold-light"
-                >
-                  BUKA MAP
-                </a>
-                <a
-                  href={googleCalendarLink({
-                    title: `${e.title} - ${couple.shortGroom} & ${couple.shortBride}`,
-                    startISO: e.startISO,
-                    endISO: e.endISO,
-                    location: e.address,
-                  })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 border gold-border rounded-full text-gold-light"
-                >
-                  KALENDER
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
+        <SectionTitle kicker="The Event">Detail Acara</SectionTitle>
       </Reveal>
+      <div className="space-y-5">
+        {events.map((e, i) => {
+          const [dayName, rest] = e.date.split(", ");
+          const [day, month, year] = rest.split(" ");
+          return (
+            <Reveal key={e.title} variant={i % 2 ? "right" : "left"}>
+              <TiltCard className="card-3d rounded-2xl border gold-border p-6">
+                <h3 className="font-script text-3xl text-gold-light">{e.title}</h3>
+                <div className="my-4 flex items-center justify-center gap-4">
+                  <p className="w-20 text-right text-xs font-semibold uppercase tracking-[0.2em] opacity-80">
+                    {dayName}
+                  </p>
+                  <p className="font-display border-x gold-border px-4 text-5xl font-semibold leading-none text-gold-light">
+                    {day}
+                  </p>
+                  <p className="w-20 text-left text-xs font-semibold uppercase tracking-[0.2em] opacity-80">
+                    {month}
+                    <br />
+                    {year}
+                  </p>
+                </div>
+                <p className="flex items-center justify-center gap-1.5 text-sm">
+                  <IconClock />
+                  {e.time}
+                </p>
+                <div className="mt-4 border-t border-gold/20 pt-4">
+                  <p className="text-sm font-semibold">{e.place}</p>
+                  <p className="mt-1 text-xs opacity-80">{e.address}</p>
+                </div>
+                <div className="mt-5 flex justify-center gap-3 text-xs">
+                  <a
+                    href={mapsLink(`${e.place} ${e.address}`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-3d inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-medium"
+                  >
+                    <IconPin />
+                    BUKA MAP
+                  </a>
+                  <a
+                    href={googleCalendarLink({
+                      title: `${e.title} - ${couple.shortGroom} & ${couple.shortBride}`,
+                      startISO: e.startISO,
+                      endISO: e.endISO,
+                      location: e.address,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 border gold-border rounded-full text-gold-light font-medium"
+                  >
+                    <IconClock />
+                    KALENDER
+                  </a>
+                </div>
+              </TiltCard>
+            </Reveal>
+          );
+        })}
+      </div>
     </section>
   );
 }
@@ -384,24 +580,35 @@ function StorySection() {
   return (
     <section id="love-story" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
-        <SectionTitle>Our Story</SectionTitle>
-        <div className="space-y-5 text-left">
+        <SectionTitle kicker="Our Journey">Our Story</SectionTitle>
+      </Reveal>
+      <div className="relative text-left">
+        <span className="absolute left-[11px] top-3 bottom-3 w-px bg-gold/15" aria-hidden="true" />
+        <ScrollLine className="absolute left-[10px] top-3 bottom-3 w-[3px] rounded-full bg-linear-to-b from-[#e8a07a] to-[#a6552a]" />
+        <div className="space-y-5">
           {story.map((s) => (
-            <div key={s.title} className="border-l-2 gold-border pl-4">
-              <h3 className="font-script text-2xl text-gold-light">
-                {s.title}
-              </h3>
-              <p className="text-sm opacity-80 mb-1">{s.date}</p>
-              <p className="text-sm leading-relaxed opacity-95">{s.text}</p>
-            </div>
+            <Reveal key={s.title}>
+              <div className="relative pl-9">
+                <span className="node-pop absolute left-0 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-gold text-[11px] text-white shadow ring-4 ring-background">
+                  ♥
+                </span>
+                <div className="card-3d rounded-xl border border-gold/30 p-4">
+                  <span className="inline-block rounded-full bg-gold/15 px-2.5 py-0.5 text-[11px] font-semibold text-gold-light">
+                    {s.date}
+                  </span>
+                  <h3 className="font-script mt-1 text-2xl text-gold-light">{s.title}</h3>
+                  <p className="text-sm leading-relaxed opacity-90">{s.text}</p>
+                </div>
+              </div>
+            </Reveal>
           ))}
         </div>
-        <p className="text-sm italic opacity-80 mt-10">
+      </div>
+      <Reveal>
+        <p className="font-display mt-10 text-lg font-medium italic leading-snug opacity-90">
           Dulu minta tolong kerjain PR, sekarang minta temani selamanya.
         </p>
-        <p className="text-xs text-gold-light mt-2 tracking-wide">
-          #FeriAyuTigaBesarDuaArah
-        </p>
+        <p className="mt-2 text-xs tracking-wide text-gold-light">#FeriAyuTigaBesarDuaArah</p>
       </Reveal>
     </section>
   );
@@ -434,22 +641,41 @@ function PhotoCarousel({ photos }: { photos: string[] }) {
   return (
     <>
       <div
-        className="card-3d relative w-full max-w-xs mx-auto aspect-[3/4] rounded-xl overflow-hidden border-2 gold-border touch-pan-y"
+        className="coverflow relative mx-auto aspect-[3/4] w-full max-w-[15rem] touch-pan-y"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {photos.map((src, i) => (
-          <div
-            key={src}
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out"
-            style={{
-              backgroundImage: `url(${src})`,
-              opacity: i === active ? 1 : 0,
-            }}
-          />
-        ))}
+        <div
+          className="absolute -inset-x-10 -bottom-6 h-1/2 bg-[radial-gradient(ellipse_at_center,rgba(199,107,57,0.28),transparent_70%)] blur-xl"
+          aria-hidden="true"
+        />
+        <div className="coverflow-stage absolute inset-0">
+          {photos.map((src, i) => {
+            const n = photos.length;
+            let offset = i - active;
+            if (offset > n / 2) offset -= n;
+            if (offset < -n / 2) offset += n;
+            const distance = Math.abs(offset);
+            return (
+              <div
+                key={src}
+                onClick={() => setActive(i)}
+                aria-hidden="true"
+                className="coverflow-item absolute inset-0 rounded-xl border-2 gold-border bg-cover bg-center"
+                style={{
+                  backgroundImage: `url(${src})`,
+                  transform: `translateX(${offset * 58}%) translateZ(${-distance * 150}px) rotateY(${-offset * 40}deg)`,
+                  opacity: distance > 1 ? 0 : 1,
+                  filter: distance === 0 ? "none" : "brightness(0.75)",
+                  zIndex: 10 - distance,
+                  pointerEvents: distance > 1 ? "none" : "auto",
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
-      <div className="flex justify-center gap-2 mt-4">
+      <div className="mt-14 flex justify-center gap-2">
         {photos.map((src, i) => (
           <button
             key={src}
@@ -469,9 +695,9 @@ function GallerySection({ photos, photos2 }: { photos: string[]; photos2: string
   return (
     <section id="gallery" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
-        <SectionTitle>Galeri Kami</SectionTitle>
+        <SectionTitle kicker="Gallery">Galeri Kami</SectionTitle>
         <PhotoCarousel photos={photos} />
-        <div className="mt-10">
+        <div className="mt-6">
           <PhotoCarousel photos={photos2} />
         </div>
       </Reveal>
@@ -479,23 +705,29 @@ function GallerySection({ photos, photos2 }: { photos: string[]; photos2: string
   );
 }
 
+function Avatar({ name }: { name: string }) {
+  return (
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#c8703c] to-[#7d3f1f] text-sm font-semibold text-white shadow">
+      {name.trim().charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
 function WishesSection({ guest, nameLocked }: { guest: string; nameLocked: boolean }) {
-  const [wishes, setWishes] = useState<{ name: string; message: string; reply?: string | null }[]>(initialWishes);
+  const [wishes, setWishes] = useState<{ name: string; message: string; reply?: string | null }[]>([]);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     fetch("/api/wishes")
       .then((r) => r.json())
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- loading shared wishes from the DB post-mount
       .then((data) => setWishes(data))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- prefill from URL guest name post-mount
-    if (params.get("to")) setName(guest);
+    if (new URLSearchParams(window.location.search).get("to")) setName(guest);
   }, [guest]);
 
   async function submit(e: React.FormEvent) {
@@ -513,21 +745,23 @@ function WishesSection({ guest, nameLocked }: { guest: string; nameLocked: boole
   return (
     <section id="ucapan" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
-        <SectionTitle>Doa & Ucapan</SectionTitle>
+        <SectionTitle kicker="Wishes">Doa & Ucapan</SectionTitle>
         <form onSubmit={submit} className="space-y-3 mb-4 text-left">
           <input
+            aria-label="Nama"
             value={name}
             onChange={(e) => setName(e.target.value)}
             readOnly={nameLocked}
             placeholder="Nama"
-            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm read-only:opacity-70"
+            className="w-full bg-white/80 border gold-border rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm read-only:opacity-70"
           />
           <textarea
+            aria-label="Pesan untuk mempelai"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Pesan untuk mempelai :"
             rows={3}
-            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm"
+            className="w-full bg-white/80 border gold-border rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm"
           />
           <button
             type="submit"
@@ -536,19 +770,24 @@ function WishesSection({ guest, nameLocked }: { guest: string; nameLocked: boole
             KIRIM PESAN
           </button>
         </form>
-        <GiftAccounts />
-        <div className="space-y-4 text-left max-h-72 overflow-y-auto pr-1">
+        {wishes.length > 0 && (
+          <p className="font-display mb-3 text-left text-xs font-semibold uppercase tracking-[0.25em] text-gold-light">
+            {wishes.length} Ucapan
+          </p>
+        )}
+        <div className="space-y-3 text-left max-h-80 overflow-y-auto pr-1">
           {wishes.map((w, i) => (
-            <div key={i} className="border-b border-gold/20 pb-3">
-              <p className="text-sm font-semibold text-gold-light">
-                {w.name}
-              </p>
-              <p className="text-sm opacity-80">{w.message}</p>
-              {w.reply && (
-                <p className="mt-2 pl-3 border-l-2 border-gold/40 text-xs opacity-80">
-                  ↳ Balasan dari Feri & Ayu: {w.reply}
-                </p>
-              )}
+            <div key={i} className="flex gap-3">
+              <Avatar name={w.name} />
+              <div className="min-w-0 flex-1 rounded-2xl rounded-tl-sm border border-gold/20 bg-white/75 px-3.5 py-2.5 shadow-sm">
+                <p className="text-sm font-semibold text-gold-light">{w.name}</p>
+                <p className="text-sm opacity-85 break-words">{w.message}</p>
+                {w.reply && (
+                  <p className="mt-2 rounded-xl bg-gold/10 px-3 py-2 text-xs">
+                    <span className="font-semibold text-gold-light">Feri &amp; Ayu:</span> {w.reply}
+                  </p>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -557,7 +796,7 @@ function WishesSection({ guest, nameLocked }: { guest: string; nameLocked: boole
   );
 }
 
-function GiftAccounts() {
+function GiftSection() {
   const [copied, setCopied] = useState<string | null>(null);
 
   function copy(number: string) {
@@ -571,28 +810,50 @@ function GiftAccounts() {
   }
 
   return (
-    <div className="mb-5 space-y-3">
-      {giftAccounts.map((g) => (
-        <div
-          key={g.number}
-          className="card-3d border gold-border rounded-lg px-4 py-3 flex items-center justify-between gap-3"
-        >
-          <div className="min-w-0">
-            <p className="text-xs font-semibold tracking-wide text-gold-light uppercase">
-              {g.bank}
-            </p>
-            <p className="text-lg font-semibold tracking-wide mt-0.5">{g.number}</p>
-            <p className="text-xs opacity-70 mt-0.5">a.n {g.name}</p>
-          </div>
-          <button
-            onClick={() => copy(g.number)}
-            className="shrink-0 text-xs px-4 py-1.5 border gold-border rounded-full text-gold-light font-medium"
-          >
-            {copied === g.number ? "Tersalin" : "Salin"}
-          </button>
-        </div>
-      ))}
-    </div>
+    <section id="hadiah" className="px-6 py-8 text-center">
+      <Reveal>
+        <SectionTitle kicker="Gift">Amplop Digital</SectionTitle>
+        <p className="mb-5 text-sm leading-relaxed opacity-90">
+          Doa restu Anda adalah karunia yang sangat berarti bagi kami. Namun jika ingin memberikan
+          tanda kasih, dapat melalui:
+        </p>
+      </Reveal>
+      <div className="space-y-4">
+        {giftAccounts.map((g, i) => (
+          <Reveal key={g.number} variant={i % 2 ? "right" : "left"}>
+            <TiltCard
+              className="gift-card relative overflow-hidden rounded-2xl p-5 text-left text-white"
+              max={11}
+            >
+              <span className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/10" />
+              <span className="pointer-events-none absolute -right-2 top-16 h-24 w-24 rounded-full bg-white/5" />
+              <div className="relative flex items-start justify-between">
+                <p className="text-lg font-bold italic tracking-wider">{g.bank}</p>
+                <span
+                  className="h-7 w-10 rounded-md bg-linear-to-br from-[#f6dfa6] to-[#c99a4a] shadow-inner"
+                  aria-hidden="true"
+                />
+              </div>
+              <p className="relative mt-6 text-xl font-semibold tracking-[0.15em]">
+                {g.number.replace(/(\d{4})(?=\d)/g, "$1 ")}
+              </p>
+              <div className="relative mt-4 flex items-end justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-75">Atas Nama</p>
+                  <p className="truncate text-sm font-semibold">{g.name}</p>
+                </div>
+                <button
+                  onClick={() => copy(g.number)}
+                  className="shrink-0 rounded-full border border-white/50 bg-white/15 px-4 py-1.5 text-xs font-medium"
+                >
+                  {copied === g.number ? "Tersalin ✓" : "Salin"}
+                </button>
+              </div>
+            </TiltCard>
+          </Reveal>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -606,15 +867,13 @@ function RsvpSection({ guest, nameLocked }: { guest: string; nameLocked: boolean
   useEffect(() => {
     fetch("/api/rsvp")
       .then((r) => r.json())
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- loading shared RSVP list from the DB post-mount
       .then((data) => setList(data))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- prefill from URL guest name post-mount
-    if (params.get("to")) setName(guest);
+    if (new URLSearchParams(window.location.search).get("to")) setName(guest);
   }, [guest]);
 
   async function submit(e: React.FormEvent) {
@@ -633,14 +892,15 @@ function RsvpSection({ guest, nameLocked }: { guest: string; nameLocked: boolean
   return (
     <section id="rsvp" className="px-6 py-8 text-center scroll-mt-0">
       <Reveal>
-        <SectionTitle>RSVP / Kehadiran</SectionTitle>
+        <SectionTitle kicker="Attendance">RSVP / Kehadiran</SectionTitle>
         <form onSubmit={submit} className="space-y-3 mb-5 text-left">
           <input
+            aria-label="Nama"
             value={name}
             onChange={(e) => setName(e.target.value)}
             readOnly={nameLocked}
             placeholder="Nama"
-            className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm read-only:opacity-70"
+            className="w-full bg-white/80 border gold-border rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm read-only:opacity-70"
           />
           <div className="flex gap-3">
             {(["Hadir", "Tidak Hadir"] as const).map((opt) => (
@@ -648,8 +908,8 @@ function RsvpSection({ guest, nameLocked }: { guest: string; nameLocked: boolean
                 type="button"
                 key={opt}
                 onClick={() => setAttend(opt)}
-                className={`flex-1 px-3 py-2 rounded-full text-xs border gold-border ${
-                  attend === opt ? "bg-gold/20 text-gold-light" : "text-foreground/70"
+                className={`flex-1 px-3 py-2 rounded-full text-sm border gold-border ${
+                  attend === opt ? "btn-3d" : "bg-white/80 text-foreground/75"
                 }`}
               >
                 {opt}
@@ -657,14 +917,19 @@ function RsvpSection({ guest, nameLocked }: { guest: string; nameLocked: boolean
             ))}
           </div>
           {attend === "Hadir" && (
-            <input
-              type="number"
-              min={1}
-              value={guests}
-              onChange={(e) => setGuests(Number(e.target.value))}
-              placeholder="Jumlah tamu"
-              className="w-full bg-background border gold-border rounded-md px-4 py-2 text-sm outline-none shadow-sm"
-            />
+            <label className="flex items-center justify-between gap-3 text-sm">
+              <span className="opacity-85">Jumlah tamu (termasuk Anda)</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                required
+                min={1}
+                max={10}
+                value={guests || ""}
+                onChange={(e) => setGuests(Number(e.target.value))}
+                className="w-20 bg-white/80 border gold-border rounded-xl px-3 py-2 text-sm text-center outline-none shadow-sm"
+              />
+            </label>
           )}
           <button
             type="submit"
@@ -673,16 +938,25 @@ function RsvpSection({ guest, nameLocked }: { guest: string; nameLocked: boolean
             KIRIM KONFIRMASI
           </button>
         </form>
-        <div className="space-y-3 text-left">
+        {list.length > 0 && (
+          <p className="font-display mb-3 text-left text-xs font-semibold uppercase tracking-[0.25em] text-gold-light">
+            {list.length} Konfirmasi
+          </p>
+        )}
+        <div className="space-y-2 text-left">
           {list.map((r, i) => (
             <div
               key={i}
-              className="border-b border-gold/20 pb-2 flex justify-between text-sm"
+              className="flex items-center gap-3 rounded-xl border border-gold/20 bg-white/75 px-3 py-2 shadow-sm"
             >
-              <span className="text-gold-light">{r.name}</span>
-              <span className="opacity-70">
-                {r.attend}
-                {r.attend === "Hadir" ? ` (${r.guests})` : ""}
+              <Avatar name={r.name} />
+              <span className="min-w-0 flex-1 truncate text-sm font-medium">{r.name}</span>
+              <span
+                className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                  r.attend === "Hadir" ? "bg-gold/15 text-gold-light" : "bg-foreground/10 text-foreground/70"
+                }`}
+              >
+                {r.attend === "Hadir" ? `Hadir · ${r.guests} org` : "Tidak Hadir"}
               </span>
             </div>
           ))}
@@ -692,21 +966,51 @@ function RsvpSection({ guest, nameLocked }: { guest: string; nameLocked: boolean
   );
 }
 
-function ClosingSection() {
+function ClosingSection({ photo }: { photo?: string }) {
   return (
-    <section className="px-6 py-10 text-center relative">
+    <section className="relative overflow-hidden text-center">
+      {photo && <FullBleedPhoto src={photo} className="h-[70svh]" />}
+      <Hearts className="absolute inset-x-0 bottom-0 h-[70%]" />
+      <div className={`relative px-6 pb-12 ${photo ? "-mt-28" : "pt-10"}`}>
+        <Reveal variant="zoom">
+          <h2 className="font-script gold-shimmer py-1 text-6xl">Terima Kasih</h2>
+        </Reveal>
+        <FloralDivider className="mt-1 mb-4" />
+        <Reveal>
+          <p className="mb-6 text-sm opacity-80">
+            Atas doa & ucapan bapak/ibu/saudara/i, Kami mengucapkan terima kasih.
+          </p>
+          <p className="font-display mb-1 text-base font-medium italic">Kami yang berbahagia,</p>
+          <p className="font-script gold-shimmer mb-8 py-1 text-5xl">
+            {couple.shortGroom} &amp; {couple.shortBride}
+          </p>
+        </Reveal>
+        <p className="text-[11px] opacity-50">Website by : Feri</p>
+      </div>
       <FloralCorner className="absolute -left-6 -bottom-6 w-32 h-32 opacity-70" />
       <FloralCorner
         flip
         className="absolute -right-6 -bottom-6 w-32 h-32 opacity-70"
       />
-      <p className="text-sm mb-6 opacity-80">
-        Atas doa & ucapan bapak/ibu/saudara/i, Kami mengucapkan terima kasih.
-      </p>
-      <p className="text-sm mb-2">Salam</p>
-
-      <p className="text-[10px] opacity-40">Website by : Feri</p>
     </section>
+  );
+}
+
+function IconPin() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
+      <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z" />
+      <circle cx="12" cy="9.5" r="2.5" />
+    </svg>
+  );
+}
+
+function IconClock() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
   );
 }
 
@@ -718,9 +1022,9 @@ function IconHeart() {
   );
 }
 
-function IconCalendar() {
+function IconCalendar({ className = "w-5 h-5" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
       <rect x="3" y="5" width="18" height="16" rx="2" />
       <path d="M3 10h18M8 3v4M16 3v4" />
     </svg>
@@ -755,15 +1059,44 @@ function IconEnvelope() {
   );
 }
 
+function IconCheck() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8 12 3 3 5-6" />
+    </svg>
+  );
+}
+
 const NAV_ITEMS = [
   { id: "mempelai", label: "Mempelai", Icon: IconHeart },
   { id: "acara", label: "Acara", Icon: IconCalendar },
   { id: "love-story", label: "Love Story", Icon: IconBook },
   { id: "gallery", label: "Galeri", Icon: IconImage },
   { id: "ucapan", label: "Ucapan", Icon: IconEnvelope },
+  { id: "rsvp", label: "RSVP", Icon: IconCheck },
 ];
 
+/** Menu bawah; bagian yang sedang dibaca ditandai dengan warna emas dan titik. */
 function BottomNav() {
+  const [active, setActive] = useState("");
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        }
+      },
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+    for (const { id } of NAV_ITEMS) {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-background/95 border-t gold-border flex justify-around py-2 z-40">
       {NAV_ITEMS.map(({ id, label, Icon }) => (
@@ -774,12 +1107,19 @@ function BottomNav() {
             e.preventDefault();
             document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
           }}
-          className="flex flex-col items-center text-[10px] text-foreground/70 hover:text-gold-light px-1"
+          className={`relative flex flex-col items-center px-1 text-[11px] transition-colors duration-300 ${
+            active === id ? "font-semibold text-gold" : "text-foreground/70"
+          }`}
         >
           <span className="mb-1 text-gold-light">
             <Icon />
           </span>
           {label}
+          <span
+            className={`absolute -top-2 h-1 w-6 rounded-full bg-gold transition-opacity duration-300 ${
+              active === id ? "opacity-100" : "opacity-0"
+            }`}
+          />
         </a>
       ))}
     </nav>
@@ -797,7 +1137,7 @@ function FloatingTools({
   const [url, setUrl] = useState("");
 
   function openQr() {
-    setUrl(typeof window !== "undefined" ? window.location.href : "");
+    setUrl(window.location.href);
     setQrOpen(true);
   }
 
@@ -812,7 +1152,7 @@ function FloatingTools({
       </button>
       <button
         onClick={openQr}
-        className="fixed bottom-20 right-4 z-40 w-10 h-10 rounded-full border gold-border bg-background/80 flex items-center justify-center text-gold-light text-xs"
+        className="fixed top-16 right-4 z-40 w-10 h-10 rounded-full border gold-border bg-background/80 flex items-center justify-center text-gold-light text-xs"
         aria-label="Show QR"
       >
         QR
@@ -826,18 +1166,15 @@ function FloatingTools({
             className="card-3d border gold-border rounded-lg p-6 text-center"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element -- QR eksternal, bukan aset statis */}
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-                url
-              )}`}
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`}
               alt="QR undangan"
               className="mx-auto mb-4"
               width={200}
               height={200}
             />
-            <p className="text-xs opacity-70 mb-4 break-all max-w-[200px]">
-              {url}
-            </p>
+            <p className="text-xs opacity-70 mb-4 break-all max-w-[200px]">{url}</p>
             <button
               onClick={() => setQrOpen(false)}
               className="px-4 py-2 border gold-border rounded-full text-gold-light text-sm"

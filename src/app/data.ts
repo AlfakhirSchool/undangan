@@ -76,19 +76,3 @@ export const story = [
   },
 ];
 
-export const initialWishes = [
-  {
-    name: "Elizabeth Bennet dan Darcy",
-    message:
-      "Sejatinya pernikahan adalah lembaran baru kehidupan, kebahagiaan, kebersamaan, dan hal-hal baik lainnya yang menyertai.",
-  },
-  {
-    name: "Edward & Bella",
-    message: "Mantap!! Selamat berbahagia menjalani bahtera rumah tangga yang baru.",
-  },
-  {
-    name: "Cinta & Rangga",
-    message: "Yeay!! Selamat ya, akhirnya kalian nikah juga :p",
-  },
-];
-
