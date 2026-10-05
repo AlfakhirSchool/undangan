@@ -67,7 +67,9 @@ export function InviteesTab({ invitees, reload }: { invitees: Invitee[]; reload:
 
   async function saveEdit() {
     if (!editing || !editing.name.trim()) return;
-    await send("PATCH", "/api/admin/invitees", editing);
+    const { id, name, type, category } = editing;
+    const ok = await send("PATCH", "/api/admin/invitees", { id, name, type, category });
+    if (!ok) return;
     setEditing(null);
     await reload();
   }

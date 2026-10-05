@@ -17,7 +17,9 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   const body = await req.json();
   const { id, name, type, category } = body;
-  if (typeof body.sent === "boolean") {
+  // Permintaan toggle hanya berisi { id, sent }. Permintaan edit yang membawa `name` tetap
+  // diedit walau objeknya juga memuat `sent`; sebelumnya ia salah dibaca sebagai toggle.
+  if (name === undefined && typeof body.sent === "boolean") {
     await sql()`update invitees set sent = ${body.sent} where id = ${id}`;
     return Response.json({ ok: true });
   }
