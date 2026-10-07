@@ -291,6 +291,7 @@ function Invitation({
       <PhotoBreak src={photos.break1[0]} caption={texts.break1_caption} />
       <EventSection />
       <StorySection />
+      <VideoSection />
       <PhotoBreak src={photos.break2[0]} caption={texts.break2_caption} />
       {photos.lamaran.length > 0 && (
         <section className="px-6 py-8 text-center scroll-mt-0">
@@ -714,8 +715,19 @@ function VideoClip({ src }: { src: string }) {
       loop
       playsInline
       preload="metadata"
-      className="w-full aspect-[4/5] object-cover rounded-xl border gold-border shadow-md"
+      className="w-full aspect-video object-cover rounded-xl border gold-border shadow-md"
     />
+  );
+}
+
+function VideoSection() {
+  return (
+    <section id="video" className="px-6 py-8 text-center scroll-mt-0">
+      <Reveal>
+        <SectionTitle kicker="Our Moments">Perjalanan Kami</SectionTitle>
+        <VideoClip src="/videos/story.mp4" />
+      </Reveal>
+    </section>
   );
 }
 
@@ -727,9 +739,6 @@ function GallerySection({ photos, photos2 }: { photos: string[]; photos2: string
         <PhotoCarousel photos={photos} />
         <div className="mt-6">
           <PhotoCarousel photos={photos2} />
-        </div>
-        <div className="mt-6">
-          <VideoClip src="/videos/story.mp4" />
         </div>
       </Reveal>
     </section>
