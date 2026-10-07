@@ -694,29 +694,64 @@ function PhotoCarousel({ photos }: { photos: string[] }) {
 
 function VideoClip({ src }: { src: string }) {
   const ref = useRef<HTMLVideoElement>(null);
+  const userPaused = useRef(false);
+  const [playing, setPlaying] = useState(false);
+
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
     const io = new IntersectionObserver(
       ([e]) => {
-        if (e.isIntersecting) v.play().catch(() => {});
-        else v.pause();
+        if (e.isIntersecting) {
+          if (!userPaused.current) v.play().catch(() => {});
+        } else v.pause();
       },
       { threshold: 0.4 },
     );
     io.observe(v);
     return () => io.disconnect();
   }, []);
+
+  function toggle() {
+    const v = ref.current;
+    if (!v) return;
+    if (v.paused) {
+      userPaused.current = false;
+      v.play().catch(() => {});
+    } else {
+      userPaused.current = true;
+      v.pause();
+    }
+  }
+
   return (
-    <video
-      ref={ref}
-      src={src}
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      className="w-full aspect-video object-cover rounded-xl border gold-border shadow-md"
-    />
+    <div className="relative">
+      <video
+        ref={ref}
+        src={src}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        className="w-full aspect-video object-cover rounded-xl border gold-border shadow-md"
+      />
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={playing ? "Jeda video" : "Putar video"}
+        className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+          {playing ? (
+            <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" />
+          ) : (
+            <path d="M8 5.5v13l11-6.5z" />
+          )}
+        </svg>
+      </button>
+    </div>
   );
 }
 
